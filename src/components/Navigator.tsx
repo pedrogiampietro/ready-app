@@ -19,6 +19,7 @@ export type RootStackParamList = {
 	RegisterPage: undefined;
 	HomePage: undefined;
 	TravelDetailPage: undefined;
+	TravelCreationForm: undefined;
 };
 
 const RootStack = createNativeStackNavigator<RootStackParamList>();
@@ -36,14 +37,14 @@ const HomeTabs = () => {
 					borderTopColor: 'transparent',
 					borderRadius: 30,
 					marginHorizontal: 10,
-					marginBottom: 20,
+					marginBottom: 14,
 					position: 'absolute',
 					bottom: 0,
 					left: 0,
 					right: 0,
 					height: 64,
 					display:
-						route.name === 'NerdSwipePage' || route.name === 'ProfilePage'
+						route.name === 'TravelCreationForm' || route.name === 'ProfilePage'
 							? 'none'
 							: 'flex',
 				},
