@@ -20,9 +20,13 @@ export const LoginPage = () => {
 		setShowPassword(!showPassword);
 	};
 
-	const handleLogin = () => {
-		navigation.navigate('HomePage');
+	const handleBack = () => {
+		navigation.navigate('OnboardPeoplePage');
 	};
+
+	// const handleLogin = () => {
+	// 	navigation.navigate('HomePage');
+	// };
 
 	const handleRegister = () => {
 		navigation.navigate('RegisterPage');
@@ -31,7 +35,7 @@ export const LoginPage = () => {
 	return (
 		<View style={styles.container}>
 			<View style={styles.header}>
-				<TouchableOpacity onPress={() => {}}>
+				<TouchableOpacity onPress={handleBack}>
 					<Ionicons name='arrow-back' size={24} color='black' />
 				</TouchableOpacity>
 			</View>

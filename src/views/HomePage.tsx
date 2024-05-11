@@ -5,10 +5,13 @@ import {
 	Image,
 	Dimensions,
 	ScrollView,
+	TouchableOpacity,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { AvatarStack } from '../components/AvatarStack';
+import { useNavigation } from '@react-navigation/native';
+import { TravelCreationForm } from '../components/TravelCreationForm';
 
 const { width, height } = Dimensions.get('window');
 
@@ -44,6 +47,12 @@ const data = [
 ];
 
 export const HomePage = () => {
+	const navigation = useNavigation() as any;
+
+	const handleRedirectDetail = () => {
+		navigation.navigate('TravelDetailPage');
+	};
+
 	return (
 		<View style={styles.container}>
 			<StatusBar style='dark' />
@@ -55,7 +64,8 @@ export const HomePage = () => {
 					/>
 					<Text style={styles.userName}>Pedro Giampietro</Text>
 				</View>
-				<Ionicons name='notifications-circle' size={32} color='#22172A' />
+
+				<TravelCreationForm />
 			</View>
 			<View style={styles.textContainer}>
 				<Text style={styles.title}>
@@ -78,23 +88,25 @@ export const HomePage = () => {
 				showsHorizontalScrollIndicator={false}
 			>
 				{data.map((item, index) => (
-					<View key={index} style={styles.card}>
-						<Image style={styles.cardImage} source={{ uri: item.image }} />
-						<Text style={styles.cardTitle}>{item.title}</Text>
-						<View style={styles.locationContainer}>
-							<View style={styles.locationGroup}>
-								<Ionicons name='location-outline' size={14} color='#22172A' />
-								<Text style={styles.locationText}>{item.location}</Text>
-							</View>
+					<TouchableOpacity key={index} onPress={handleRedirectDetail}>
+						<View key={index} style={styles.card}>
+							<Image style={styles.cardImage} source={{ uri: item.image }} />
+							<Text style={styles.cardTitle}>{item.title}</Text>
+							<View style={styles.locationContainer}>
+								<View style={styles.locationGroup}>
+									<Ionicons name='location-outline' size={14} color='#22172A' />
+									<Text style={styles.locationText}>{item.location}</Text>
+								</View>
 
-							<View style={styles.likesContainer}>
-								<View style={styles.avatarsContainer}>
-									<AvatarStack />
-									<Text style={styles.likesText}>+{item.likes}</Text>
+								<View style={styles.likesContainer}>
+									<View style={styles.avatarsContainer}>
+										<AvatarStack />
+										<Text style={styles.likesText}>+{item.likes}</Text>
+									</View>
 								</View>
 							</View>
 						</View>
-					</View>
+					</TouchableOpacity>
 				))}
 			</ScrollView>
 		</View>
