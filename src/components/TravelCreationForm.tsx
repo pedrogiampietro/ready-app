@@ -16,13 +16,24 @@ import {
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { format } from 'date-fns';
+import axios from 'axios';
 
 const windowHeight = Dimensions.get('window').height;
+
+interface LocationOption {
+	name: string;
+	country: string;
+	population: number;
+}
 
 export const TravelCreationForm = () => {
 	const [modalVisible, setModalVisible] = useState(false);
 	const [title, setTitle] = useState('');
 	const [location, setLocation] = useState('');
+	const [locationOptions, setLocationOptions] = useState<LocationOption[]>([]);
+	const [showOptions, setShowOptions] = useState(true);
 	const [images, setImages] = useState<any>([]);
 	const [headerImage, setHeaderImage] = useState<any>(
 		'https://www.remessaonline.com.br/blog/wp-content/uploads/2022/05/viagem-para-cancun.jpg'
@@ -31,9 +42,13 @@ export const TravelCreationForm = () => {
 	const [accommodation, setAccommodation] = useState('');
 	const [accommodationDuration, setAccommodationDuration] = useState('');
 
-	const [flightDepartureDate, setFlightDepartureDate] = useState('');
-	const [flightReturnDate, setFlightReturnDate] = useState('');
+	const [flightDepartureDate, setFlightDepartureDate] = useState(new Date());
+	const [flightReturnDate, setFlightReturnDate] = useState(new Date());
 	const [flightCost, setFlightCost] = useState('');
+	const [showDatePicker, setShowDatePicker] = useState(false);
+	const [datePickerMode, setDatePickerMode] = useState<'departure' | 'return'>(
+		'departure'
+	);
 
 	const [mealOptions, setMealOptions] = useState({
 		breakfast: false,
@@ -46,6 +61,24 @@ export const TravelCreationForm = () => {
 		lunch: false,
 		dinner: false,
 	});
+
+	const searchLocations = async (query: string) => {
+		try {
+			const response = await axios.get(
+				`http://api.geonames.org/searchJSON?name_startsWith=${query}&maxRows=5&username=abhiaiyer`
+			);
+			setLocationOptions(
+				response.data.geonames.map((item: any) => ({
+					name: item.name,
+					country: item.countryName,
+					population: item.population,
+				}))
+			);
+		} catch (error) {
+			console.error('Erro ao buscar localizações:', error);
+			setLocationOptions([]);
+		}
+	};
 
 	const handleOpenModal = () => {
 		setModalVisible(true);
@@ -117,6 +150,27 @@ export const TravelCreationForm = () => {
 		}));
 	};
 
+	const handleLocationSelect = (selectedLocation: string) => {
+		setLocation(selectedLocation);
+		setShowOptions(false);
+	};
+
+	const handleOpenDatePicker = (mode: 'departure' | 'return') => {
+		setShowDatePicker(true);
+		setDatePickerMode(mode);
+	};
+
+	const handleDateChange = (event: any, selectedDate: Date | undefined) => {
+		setShowDatePicker(false);
+		if (selectedDate !== undefined) {
+			if (datePickerMode === 'departure') {
+				setFlightDepartureDate(selectedDate);
+			} else {
+				setFlightReturnDate(selectedDate);
+			}
+		}
+	};
+
 	return (
 		<View style={styles.container}>
 			<TouchableOpacity onPress={handleOpenModal}>
@@ -158,10 +212,32 @@ export const TravelCreationForm = () => {
 							/>
 							<TextInput
 								style={styles.input}
-								placeholder='Localização'
+								placeholder='Location'
 								value={location}
-								onChangeText={setLocation}
+								onChangeText={(text) => {
+									setLocation(text);
+									setShowOptions(true);
+									searchLocations(text);
+								}}
 							/>
+
+							{showOptions && (
+								<View style={styles.optionsContainer}>
+									{locationOptions.map(
+										(option: LocationOption, index: number) => (
+											<TouchableOpacity
+												key={index}
+												onPress={() => handleLocationSelect(option.name)}
+												style={styles.optionItem}
+											>
+												<Text>
+													{option.name} - {option.country}
+												</Text>
+											</TouchableOpacity>
+										)
+									)}
+								</View>
+							)}
 
 							<TextInput
 								style={styles.input}
@@ -177,18 +253,42 @@ export const TravelCreationForm = () => {
 								keyboardType='numeric'
 							/>
 
-							<TextInput
-								style={styles.input}
-								placeholder='Data de partida do voo'
-								value={flightDepartureDate}
-								onChangeText={setFlightDepartureDate}
-							/>
-							<TextInput
-								style={styles.input}
-								placeholder='Data de retorno do voo'
-								value={flightReturnDate}
-								onChangeText={setFlightReturnDate}
-							/>
+							<View style={styles.inputContainer}>
+								<TouchableOpacity
+									style={styles.inputTouchable}
+									onPress={() => handleOpenDatePicker('departure')}
+								>
+									<Text style={styles.inputLabel}>Data de partida do voo:</Text>
+									<Text style={styles.inputText}>
+										{format(flightDepartureDate, 'dd/MM/yyyy')}
+									</Text>
+								</TouchableOpacity>
+								<TouchableOpacity
+									style={styles.inputTouchable}
+									onPress={() => handleOpenDatePicker('return')}
+								>
+									<Text style={styles.inputLabel}>Data de retorno do voo:</Text>
+									<Text style={styles.inputText}>
+										{format(flightReturnDate, 'dd/MM/yyyy')}
+									</Text>
+								</TouchableOpacity>
+							</View>
+
+							{showDatePicker && (
+								<DateTimePicker
+									value={
+										datePickerMode === 'departure'
+											? flightDepartureDate
+											: flightReturnDate
+									}
+									mode='date'
+									display='inline'
+									locale='pt-BR' // Definindo o idioma para português brasileiro
+									timeZoneOffsetInMinutes={-180} // Definindo o fuso horário para o Brasil (-3 horas em relação ao UTC)
+									onChange={handleDateChange}
+								/>
+							)}
+
 							<TextInput
 								style={styles.input}
 								placeholder='Custo do voo'
@@ -387,6 +487,15 @@ const styles = StyleSheet.create({
 		margin: 10,
 		borderRadius: 6,
 	},
+	optionsContainer: {
+		marginTop: 10,
+	},
+	optionItem: {
+		paddingVertical: 10,
+		paddingHorizontal: 15,
+		borderBottomWidth: 1,
+		borderBottomColor: '#ddd',
+	},
 	imageSlider: {
 		marginTop: 20,
 	},
@@ -423,5 +532,24 @@ const styles = StyleSheet.create({
 	},
 	bottomContainer: {
 		alignItems: 'center',
+	},
+	inputContainer: {
+		marginVertical: 10,
+	},
+	inputTouchable: {
+		borderWidth: 1,
+		borderColor: '#ddd',
+		padding: 10,
+		margin: 10,
+		borderRadius: 6,
+	},
+	inputLabel: {
+		fontSize: 16,
+		color: '#333',
+		marginBottom: 5,
+	},
+	inputText: {
+		fontSize: 14,
+		color: '#666',
 	},
 });

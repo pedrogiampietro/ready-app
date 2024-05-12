@@ -43,10 +43,10 @@ const HomeTabs = () => {
 					left: 0,
 					right: 0,
 					height: 64,
-					display:
-						route.name === 'TravelCreationForm' || route.name === 'ProfilePage'
-							? 'none'
-							: 'flex',
+					// display:
+					// 	route.name === 'TravelCreationForm' || route.name === 'ProfilePage'
+					// 		? 'none'
+					// 		: 'flex',
 				},
 			})}
 		>
