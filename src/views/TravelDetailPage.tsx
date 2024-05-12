@@ -34,7 +34,7 @@ export const TravelDetailPage = () => {
 				<TouchableOpacity onPress={handleBack}>
 					<Ionicons name='arrow-back' size={24} color='#333' />
 				</TouchableOpacity>
-				<Text style={styles.headerTitle}>Details</Text>
+				<Text style={styles.headerTitle}>Detalhes da Viagem</Text>
 				<Ionicons name='bookmark-outline' size={24} color='#333' />
 			</View>
 			<View style={styles.card}>

@@ -283,8 +283,8 @@ export const TravelCreationForm = () => {
 									}
 									mode='date'
 									display='inline'
-									locale='pt-BR' // Definindo o idioma para português brasileiro
-									timeZoneOffsetInMinutes={-180} // Definindo o fuso horário para o Brasil (-3 horas em relação ao UTC)
+									locale='pt-BR'
+									timeZoneOffsetInMinutes={-180}
 									onChange={handleDateChange}
 								/>
 							)}

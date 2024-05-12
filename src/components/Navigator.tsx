@@ -9,6 +9,7 @@ import { LoginPage } from '../views/LoginPage';
 import { RegisterPage } from '../views/RegisterPage';
 import { HomePage } from '../views/HomePage';
 import { TravelDetailPage } from '../views/TravelDetailPage';
+import { CalendarPage } from '../views/CalendarPage';
 
 export type RootStackParamList = {
 	HomeTabs: undefined;
@@ -57,6 +58,20 @@ const HomeTabs = () => {
 					tabBarIcon: ({ color, size, focused }) => (
 						<Ionicons
 							name={focused ? 'home' : 'home-outline'}
+							color={color}
+							size={size}
+						/>
+					),
+					tabBarLabel: () => null,
+				}}
+			/>
+			<Tab.Screen
+				name='CalendarPage'
+				component={CalendarPage}
+				options={{
+					tabBarIcon: ({ color, size, focused }) => (
+						<Ionicons
+							name={focused ? 'calendar' : 'calendar-outline'}
 							color={color}
 							size={size}
 						/>
