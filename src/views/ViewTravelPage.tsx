@@ -1,8 +1,54 @@
 import React from "react";
-import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
+import {
+  StyleSheet,
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+} from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
+
+const { Navigator, Screen } = createMaterialTopTabNavigator();
+
+const GeneralScreen = () => (
+  <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+    <Text style={styles.infoTitle}>Informações da Viagem</Text>
+    <ScrollView showsHorizontalScrollIndicator>
+      <Text style={styles.infoText}>
+        A viagem foi simplesmente incrível! Tudo o que planejamos foi realizado
+        com sucesso e ainda superou nossas expectativas. Desde o momento em que
+        embarcamos até o nosso retorno, cada momento foi repleto de alegria e
+        emoção. As paisagens que vimos eram de tirar o fôlego, as pessoas que
+        conhecemos ao longo do caminho eram amigáveis e acolhedoras, e a
+        comida... ah, a comida era de outro mundo! Cada refeição era uma nova
+        aventura culinária que nos deixava ansiosos pela próxima. E a melhor
+        parte? Conseguimos fazer tudo isso e ainda economizar! Graças ao nosso
+        planejamento cuidadoso e à nossa disposição para buscar as melhores
+        ofertas, conseguimos aproveitar ao máximo nossa viagem sem estourar o
+        orçamento. Na verdade, até sobrou dinheiro! No final, esta viagem não
+        foi apenas uma chance de ver novos lugares e experimentar novas coisas.
+        Foi uma jornada de autodescoberta e crescimento pessoal que nos deixou
+        com lembranças que vamos valorizar para sempre. Mal podemos esperar pela
+        próxima!
+      </Text>
+    </ScrollView>
+  </View>
+);
+
+const RestaurantsScreen = () => (
+  <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+    <Text>Restaurantes</Text>
+  </View>
+);
+
+// const TravelScreen = () => (
+//   <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+//     <Text>Viagens</Text>
+//   </View>
+// );
 
 export const ViewTravelPage = () => {
   const navigation = useNavigation() as any;
@@ -19,8 +65,15 @@ export const ViewTravelPage = () => {
         <TouchableOpacity onPress={handleBack}>
           <Ionicons name="arrow-back" size={24} color="#333" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Calendário</Text>
+        <Text style={styles.headerTitle}>Viagem XyZ</Text>
         <Ionicons name="notifications-outline" size={24} color="#FF7029" />
+      </View>
+
+      <View style={styles.tabContainer}>
+        <Navigator>
+          <Screen name="Geral" component={GeneralScreen} />
+          <Screen name="Restaurantes" component={RestaurantsScreen} />
+        </Navigator>
       </View>
     </View>
   );
@@ -43,5 +96,20 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 24,
     fontWeight: "bold",
+  },
+  tabContainer: {
+    marginTop: 80,
+    flex: 1,
+  },
+  infoTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginTop: 20,
+  },
+  infoText: {
+    fontSize: 16,
+    color: "#444",
+    marginTop: 10,
+    padding: 20,
   },
 });
