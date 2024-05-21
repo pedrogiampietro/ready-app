@@ -7,7 +7,7 @@ type HotelProps = {
   address: string;
   checkInDate: string;
   checkOutDate: string;
-  confirmationCode: string;
+  quantityBads: string;
   duration: string;
 };
 
@@ -16,7 +16,7 @@ export const HotelCard = ({
   address,
   checkInDate,
   checkOutDate,
-  confirmationCode,
+  quantityBads,
   duration,
 }: HotelProps) => {
   return (
@@ -38,8 +38,8 @@ export const HotelCard = ({
       </View>
       <View style={styles.checkInOutRow}>
         <View>
-          <Text style={styles.askTime}>Confirmation</Text>
-          <Text style={styles.answerTime}>{confirmationCode}</Text>
+          <Text style={styles.askTime}>Camas</Text>
+          <Text style={styles.answerTime}>{quantityBads}</Text>
         </View>
         <View>
           <Text style={styles.askTime}>Duração</Text>
@@ -108,6 +108,7 @@ const styles = StyleSheet.create({
   answerTime: {
     fontSize: 14,
     marginBottom: 8,
+    alignSelf: "center",
   },
 });
 
@@ -117,6 +118,6 @@ const styles = StyleSheet.create({
 //   address="123 Main St, New York, NY"
 //   checkInDate="Jul 5, 8:00 PM EDT"
 //   checkOutDate="Jul 9, 9:00 AM EDT"
-//   confirmationCode="ABC123"
+//   quantityBads="ABC123"
 //   duration="4"
 // />
