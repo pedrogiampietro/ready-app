@@ -3,6 +3,7 @@ import {
   StyleSheet,
   View,
   Text,
+  TextInput,
   TouchableOpacity,
   ScrollView,
 } from "react-native";
@@ -15,27 +16,59 @@ import { HotelCard } from "../components/HotelCard";
 const { Navigator, Screen } = createMaterialTopTabNavigator();
 
 const travelExpenses = [
-  { description: "Passagens aéreas", amount: 1000 },
-  { description: "Hospedagem", amount: 800 },
-  { description: "Alimentação", amount: 500 },
+  { id: 1, description: "Passagens aéreas", amount: 1000 },
+  { id: 2, description: "Hospedagem", amount: 800 },
+  { id: 3, description: "Alimentação", amount: 500 },
 ];
+
+const totalExpenses = travelExpenses.reduce(
+  (total, expense) => total + expense.amount,
+  0
+);
 
 const GeneralScreen = () => {
   const [showFullText, setShowFullText] = useState(false);
-
-  const totalExpenses = travelExpenses.reduce(
-    (total, expense) => total + expense.amount,
-    0
-  );
+  const [dailySavings, setDailySavings] = useState([]);
+  const [savingsInput, setSavingsInput] = useState("");
 
   const startDate = new Date("2024-05-21");
   const endDate = new Date("2024-06-21");
-  const numberOfDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+  const initialNumberOfDays = Math.ceil(
+    (endDate - startDate) / (1000 * 60 * 60 * 24)
+  );
 
-  const dailyBudget = totalExpenses / numberOfDays;
+  const totalSavings = dailySavings.reduce(
+    (total, saving) => total + saving.amount,
+    0
+  );
+
+  const remainingAmount = totalExpenses - totalSavings;
+  const dailyBudget = remainingAmount / initialNumberOfDays;
+
+  const addDailySaving = () => {
+    if (savingsInput !== "") {
+      const newSaving = {
+        amount: parseFloat(savingsInput),
+        date: new Date().toLocaleDateString(),
+      };
+      setDailySavings([...dailySavings, newSaving]);
+      setSavingsInput("");
+    }
+  };
+
+  const removeDailySaving = (index) => {
+    const updatedSavings = dailySavings.filter((_, i) => i !== index);
+    setDailySavings(updatedSavings);
+  };
+
+  const calculateDaysToReachGoal = () => {
+    return Math.ceil(remainingAmount / dailyBudget);
+  };
+
+  const daysToReachGoal = calculateDaysToReachGoal();
 
   return (
-    <View>
+    <ScrollView>
       <View style={{ alignItems: "center" }}>
         <Text style={styles.infoTitle}>Informações da Viagem</Text>
         <ScrollView style={styles.scrollViewStyle} showsVerticalScrollIndicator>
@@ -68,18 +101,51 @@ const GeneralScreen = () => {
         <Text style={[styles.infoTitle, { marginTop: 0 }]}>
           Gastos da Viagem
         </Text>
-        {travelExpenses.map((expense, index) => (
-          <Text key={index}>
+        {travelExpenses.map((expense) => (
+          <Text key={expense.id}>
             {expense.description}: R$ {expense.amount.toFixed(2)}
           </Text>
         ))}
         <Text style={{ fontWeight: "bold" }}>
           Total: R$ {totalExpenses.toFixed(2)}
         </Text>
-        <Text>Dias até a viagem: {numberOfDays}</Text>
+        <Text>Dias até a viagem: {initialNumberOfDays}</Text>
         <Text>Valor diário a economizar: R$ {dailyBudget.toFixed(2)}</Text>
+        <Text>Dias necessários para atingir a meta: {daysToReachGoal}</Text>
       </View>
-    </View>
+
+      <View style={styles.expenseInputContainer}>
+        <TextInput
+          style={styles.expenseInput}
+          placeholder="Adicionar economia diária"
+          keyboardType="numeric"
+          value={savingsInput}
+          onChangeText={setSavingsInput}
+        />
+        <TouchableOpacity style={styles.addButton} onPress={addDailySaving}>
+          <Text style={styles.addButtonText}>Adicionar</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.expenseCard}>
+        <Text style={[styles.infoTitle, { marginTop: 0 }]}>
+          Economias Diárias
+        </Text>
+        {dailySavings.map((saving, index) => (
+          <View key={index} style={styles.savingItem}>
+            <Text>
+              Data: {saving.date} - Economia: R$ {saving.amount.toFixed(2)}
+            </Text>
+            <TouchableOpacity onPress={() => removeDailySaving(index)}>
+              <Text style={styles.removeText}>Remover</Text>
+            </TouchableOpacity>
+          </View>
+        ))}
+        <Text style={{ fontWeight: "bold" }}>
+          Total das economias diárias: R$ {totalSavings.toFixed(2)}
+        </Text>
+      </View>
+    </ScrollView>
   );
 };
 
@@ -90,7 +156,7 @@ const RestaurantsScreen = () => (
 );
 
 export const ViewTravelPage = () => {
-  const navigation = useNavigation() as any;
+  const navigation = useNavigation();
 
   const handleBack = () => {
     navigation.navigate("HomeTabs");
@@ -174,5 +240,37 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+  },
+  expenseInputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    margin: 16,
+  },
+  expenseInput: {
+    borderBottomWidth: 1,
+    borderBottomColor: "#CCC",
+    width: 200,
+    marginRight: 10,
+    padding: 8,
+  },
+  addButton: {
+    backgroundColor: "#FF7029",
+    padding: 10,
+    borderRadius: 5,
+  },
+  addButtonText: {
+    color: "#FFF",
+    fontWeight: "bold",
+  },
+  savingItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginVertical: 4,
+  },
+  removeText: {
+    color: "red",
+    marginLeft: 10,
   },
 });
