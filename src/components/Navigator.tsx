@@ -11,6 +11,7 @@ import { HomePage } from "../views/HomePage";
 import { TravelDetailPage } from "../views/TravelDetailPage";
 import { CalendarPage } from "../views/CalendarPage";
 import { ViewTravelPage } from "../views/ViewTravelPage";
+import { GenerateTravelWithIAPage } from "../views/GenerateTravelWithIAPage";
 
 export type RootStackParamList = {
   HomeTabs: undefined;
@@ -46,10 +47,7 @@ const HomeTabs = () => {
           left: 0,
           right: 0,
           height: 64,
-          // display:
-          // 	route.name === 'TravelCreationForm' || route.name === 'ProfilePage'
-          // 		? 'none'
-          // 		: 'flex',
+          display: route.name === "GenerateTravelWithIAPage" ? "none" : "flex",
         },
       })}
     >
@@ -74,6 +72,20 @@ const HomeTabs = () => {
           tabBarIcon: ({ color, size, focused }) => (
             <Ionicons
               name={focused ? "calendar" : "calendar-outline"}
+              color={color}
+              size={size}
+            />
+          ),
+          tabBarLabel: () => null,
+        }}
+      />
+      <Tab.Screen
+        name="GenerateTravelWithIAPage"
+        component={GenerateTravelWithIAPage}
+        options={{
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons
+              name={focused ? "sparkles" : "sparkles-outline"}
               color={color}
               size={size}
             />
