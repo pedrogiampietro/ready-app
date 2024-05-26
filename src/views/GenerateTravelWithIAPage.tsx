@@ -16,6 +16,8 @@ import { apiClient } from "../services/api";
 import { format } from "date-fns";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import axios from "axios";
+import { Loading } from "../components/Loading";
+import { TravelPlanModal } from "../components/TravelPlanModal";
 
 interface LocationOption {
   name: string;
@@ -25,7 +27,6 @@ interface LocationOption {
 
 export const GenerateTravelWithIAPage = () => {
   const navigation = useNavigation() as any;
-
   const [classLevel, setClassLevel] = useState("média");
   const [budget, setBudget] = useState("");
   const [travelStyle, setTravelStyle] = useState("luxo");
@@ -48,6 +49,9 @@ export const GenerateTravelWithIAPage = () => {
   >([]);
   const [showDepartureOptions, setShowDepartureOptions] = useState(false);
   const [showDestinationOptions, setShowDestinationOptions] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [travelPlan, setTravelPlan] = useState("");
+  const [showModal, setShowModal] = useState(false);
 
   const activitiesItems = [
     { name: "Vida noturna", id: "vida noturna" },
@@ -55,13 +59,14 @@ export const GenerateTravelWithIAPage = () => {
     { name: "Parques", id: "parques" },
     { name: "Shoppings", id: "shoppings" },
     { name: "Eventos culturais", id: "eventos culturais" },
-  ] as any;
+  ];
 
   const handleBack = () => {
     navigation.navigate("HomePage");
   };
 
   const handleSubmit = async () => {
+    setLoading(true);
     const travelPreferences = {
       classLevel,
       budget,
@@ -74,8 +79,15 @@ export const GenerateTravelWithIAPage = () => {
       flightReturnDate,
     };
 
-    const result = await apiClient().post("/chat", travelPreferences);
-    console.log(result.data);
+    try {
+      const result = await apiClient().post("/chat", travelPreferences);
+      setTravelPlan(result.data.response);
+      setShowModal(true);
+    } catch (error) {
+      console.error("Erro ao gerar viagem:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleOpenDatePicker = (mode: "departure" | "return") => {
@@ -178,12 +190,11 @@ export const GenerateTravelWithIAPage = () => {
           </Text>
         </TouchableOpacity>
       </View>
-
       <View>
         <Text style={styles.label}>Está partindo de onde?</Text>
         <TextInput
           style={styles.input}
-          placeholder="partindo de onde?"
+          placeholder="Ex: Rio de Janeiro"
           value={departureLocation}
           onChangeText={(text) => {
             setDepartureLocation(text);
@@ -209,12 +220,11 @@ export const GenerateTravelWithIAPage = () => {
           </View>
         )}
       </View>
-
       <View>
         <Text style={styles.label}>Está indo para onde?</Text>
         <TextInput
           style={styles.input}
-          placeholder="indo para onde?"
+          placeholder="Ex: São Paulo"
           value={destinationLocation}
           onChangeText={(text) => {
             setDestinationLocation(text);
@@ -242,7 +252,6 @@ export const GenerateTravelWithIAPage = () => {
           </View>
         )}
       </View>
-
       {showDatePicker && (
         <DateTimePicker
           value={
@@ -257,7 +266,6 @@ export const GenerateTravelWithIAPage = () => {
           onChange={handleDateChange}
         />
       )}
-
       <View>
         <Text style={styles.label}>Informe sua classe social:</Text>
         <View style={styles.pickerContainer}>
@@ -271,7 +279,6 @@ export const GenerateTravelWithIAPage = () => {
             <Picker.Item label="Alta" value="alta" />
           </Picker>
         </View>
-
         <Text style={styles.label}>Orçamento total pela viagem:</Text>
         <TextInput
           style={styles.input}
@@ -280,7 +287,6 @@ export const GenerateTravelWithIAPage = () => {
           value={budget}
           onChangeText={setBudget}
         />
-
         <Text style={styles.label}>Seu estilo de viagem:</Text>
         <View style={styles.pickerContainer}>
           <Picker
@@ -294,7 +300,6 @@ export const GenerateTravelWithIAPage = () => {
             <Picker.Item label="Econômico" value="econômico" />
           </Picker>
         </View>
-
         <Text style={styles.label}>O que você gosta de fazer:</Text>
         <View style={styles.pickerContainer}>
           <SectionedMultiSelect
@@ -310,7 +315,6 @@ export const GenerateTravelWithIAPage = () => {
             colors={{ primary: "#FF7029" }}
           />
         </View>
-
         <Text style={styles.label}>Confortável com transporte público:</Text>
         <View style={styles.switchContainer}>
           <Text style={styles.switchLabel}>
@@ -322,9 +326,22 @@ export const GenerateTravelWithIAPage = () => {
           />
         </View>
       </View>
-      <TouchableOpacity style={styles.generateButton} onPress={handleSubmit}>
-        <Text style={styles.generateText}>Gerar Viagem</Text>
+      <TouchableOpacity
+        style={styles.generateButton}
+        onPress={handleSubmit}
+        disabled={loading}
+      >
+        {loading ? (
+          <Loading />
+        ) : (
+          <Text style={styles.generateText}>Gerar Viagem</Text>
+        )}
       </TouchableOpacity>
+      <TravelPlanModal
+        visible={showModal}
+        travelPlan={travelPlan}
+        onClose={() => setShowModal(false)}
+      />
     </ScrollView>
   );
 };
