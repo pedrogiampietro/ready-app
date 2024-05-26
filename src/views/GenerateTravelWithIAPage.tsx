@@ -171,26 +171,29 @@ export const GenerateTravelWithIAPage = () => {
         </Text>
       </View>
       <View style={styles.inputContainer}>
+        <Text style={styles.label}>Data de partida do voo:</Text>
         <TouchableOpacity
           style={styles.inputTouchable}
           onPress={() => handleOpenDatePicker("departure")}
         >
-          <Text style={styles.inputLabel}>Data de partida do voo:</Text>
           <Text style={styles.inputText}>
             {format(flightDepartureDate, "dd/MM/yyyy")}
           </Text>
         </TouchableOpacity>
+      </View>
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>Data de retorno do voo:</Text>
         <TouchableOpacity
           style={styles.inputTouchable}
           onPress={() => handleOpenDatePicker("return")}
         >
-          <Text style={styles.inputLabel}>Data de retorno do voo:</Text>
           <Text style={styles.inputText}>
             {format(flightReturnDate, "dd/MM/yyyy")}
           </Text>
         </TouchableOpacity>
       </View>
-      <View>
+
+      <View style={{ marginTop: 10 }}>
         <Text style={styles.label}>Está partindo de onde?</Text>
         <TextInput
           style={styles.input}
@@ -429,10 +432,9 @@ const styles = StyleSheet.create({
   },
   inputTouchable: {
     borderWidth: 1,
-    borderColor: "#333",
+    borderColor: "#ddd",
     backgroundColor: "#FFF",
     padding: 10,
-    marginVertical: 10,
     borderRadius: 6,
   },
   inputLabel: {
