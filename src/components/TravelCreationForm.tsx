@@ -1,555 +1,669 @@
-import React, { useState } from 'react';
+import React, { Fragment, useState } from "react";
 import {
-	View,
-	Text,
-	TouchableOpacity,
-	Modal,
-	Image,
-	StyleSheet,
-	Dimensions,
-	TextInput,
-	ToastAndroid,
-	Alert,
-	ScrollView,
-	KeyboardAvoidingView,
-	Platform,
-} from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
-import { Ionicons } from '@expo/vector-icons';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import { format } from 'date-fns';
-import axios from 'axios';
+  View,
+  Text,
+  TouchableOpacity,
+  Modal,
+  Image,
+  StyleSheet,
+  Dimensions,
+  TextInput,
+  ToastAndroid,
+  Alert,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+  TouchableWithoutFeedback,
+  Keyboard,
+  Button,
+} from "react-native";
+import * as ImagePicker from "expo-image-picker";
+import { Ionicons } from "@expo/vector-icons";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import { format } from "date-fns";
+import axios from "axios";
+import { apiClient } from "../services/api";
+import { Loading } from "./Loading";
+import { CheckBox } from "./CheckBox";
 
-const windowHeight = Dimensions.get('window').height;
+const windowHeight = Dimensions.get("window").height;
 
 interface LocationOption {
-	name: string;
-	country: string;
-	population: number;
+  name: string;
+  country: string;
+  population: number;
 }
 
-export const TravelCreationForm = () => {
-	const [modalVisible, setModalVisible] = useState(false);
-	const [title, setTitle] = useState('');
-	const [location, setLocation] = useState('');
-	const [locationOptions, setLocationOptions] = useState<LocationOption[]>([]);
-	const [showOptions, setShowOptions] = useState(true);
-	const [images, setImages] = useState<any>([]);
-	const [headerImage, setHeaderImage] = useState<any>(
-		'https://www.remessaonline.com.br/blog/wp-content/uploads/2022/05/viagem-para-cancun.jpg'
-	);
+interface Meal {
+  checked: boolean;
+  value: string;
+  visible: boolean;
+}
 
-	const [accommodation, setAccommodation] = useState('');
-	const [accommodationDuration, setAccommodationDuration] = useState('');
+interface Meals {
+  breakfast: Meal;
+  lunch: Meal;
+  dinner: Meal;
+}
 
-	const [flightDepartureDate, setFlightDepartureDate] = useState(new Date());
-	const [flightReturnDate, setFlightReturnDate] = useState(new Date());
-	const [flightCost, setFlightCost] = useState('');
-	const [showDatePicker, setShowDatePicker] = useState(false);
-	const [datePickerMode, setDatePickerMode] = useState<'departure' | 'return'>(
-		'departure'
-	);
+export const TravelCreationForm = ({ updateCallbackTrips }: any) => {
+  const [loading, setLoading] = useState(false);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+  const [loadingEmbelizeTitle, setLoadingEbelizeTitle] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [title, setTitle] = useState("");
+  const [location, setLocation] = useState("");
+  const [locationOptions, setLocationOptions] = useState<LocationOption[]>([]);
+  const [showOptions, setShowOptions] = useState(false);
+  const [images, setImages] = useState<any[]>([]);
+  const [headerImage, setHeaderImage] = useState<any>(
+    "https://www.remessaonline.com.br/blog/wp-content/uploads/2022/05/viagem-para-cancun.jpg"
+  );
 
-	const [mealOptions, setMealOptions] = useState({
-		breakfast: false,
-		lunch: false,
-		dinner: false,
-	});
+  const [accommodation, setAccommodation] = useState("");
+  const [accommodationDuration, setAccommodationDuration] = useState("");
+  const [accommodationPrice, setAccommodationPrice] = useState("");
 
-	const [mealInputsVisible, setMealInputsVisible] = useState<any>({
-		breakfast: false,
-		lunch: false,
-		dinner: false,
-	});
+  const [flightDepartureDate, setFlightDepartureDate] = useState(new Date());
+  const [flightReturnDate, setFlightReturnDate] = useState(new Date());
+  const [flightCost, setFlightCost] = useState("");
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [datePickerMode, setDatePickerMode] = useState<"departure" | "return">(
+    "departure"
+  );
 
-	const searchLocations = async (query: string) => {
-		try {
-			const response = await axios.get(
-				`http://api.geonames.org/searchJSON?name_startsWith=${query}&maxRows=5&username=abhiaiyer`
-			);
-			setLocationOptions(
-				response.data.geonames.map((item: any) => ({
-					name: item.name,
-					country: item.countryName,
-					population: item.population,
-				}))
-			);
-		} catch (error) {
-			console.error('Erro ao buscar localizações:', error);
-			setLocationOptions([]);
-		}
-	};
+  const [isFlying, setIsFlying] = useState(false);
 
-	const handleOpenModal = () => {
-		setModalVisible(true);
-	};
+  const [meals, setMeals] = useState<Meals>({
+    breakfast: { checked: false, value: "", visible: false },
+    lunch: { checked: false, value: "", visible: false },
+    dinner: { checked: false, value: "", visible: false },
+  });
 
-	const handleCloseModal = () => {
-		setModalVisible(false);
-	};
+  const toggleMealOption = (meal: keyof Meals) => {
+    setMeals({
+      ...meals,
+      [meal]: {
+        ...meals[meal],
+        checked: !meals[meal].checked,
+        visible: !meals[meal].visible,
+      },
+    });
+  };
 
-	const addImage = async () => {
-		const { granted } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-		if (!granted) {
-			Alert.alert(
-				'Permissão necessária',
-				'Permita que sua aplicação acesse as imagens'
-			);
-		} else {
-			const { assets, canceled } = await ImagePicker.launchImageLibraryAsync({
-				allowsEditing: true,
-				mediaTypes: ImagePicker.MediaTypeOptions.Images,
-				base64: false,
-				aspect: [4, 4],
-				quality: 1,
-			});
+  const updateMealValue = (meal: keyof Meals, value: string) => {
+    setMeals({
+      ...meals,
+      [meal]: { ...meals[meal], value: value },
+    });
+  };
 
-			if (canceled) {
-				ToastAndroid.show('Operação cancelada', ToastAndroid.SHORT);
-			} else {
-				setImages([...images, assets[0]?.uri]);
-			}
-		}
-	};
+  const searchLocations = async (query: string) => {
+    setLoadingSuggestions(true);
+    try {
+      const response = await axios.get(
+        `http://api.geonames.org/searchJSON?name_startsWith=${query}&maxRows=5&username=abhiaiyer`
+      );
+      setLocationOptions(
+        response.data.geonames.map((item: any) => ({
+          name: item.name,
+          country: item.countryName,
+          population: item.population,
+        }))
+      );
+    } catch (error) {
+      console.error("Erro ao buscar localizações:", error);
+      setLocationOptions([]);
+    } finally {
+      setLoadingSuggestions(false);
+    }
+  };
+  const handleOpenModal = () => {
+    setModalVisible(true);
+  };
 
-	const changeHeaderImage = async () => {
-		const { granted } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-		if (!granted) {
-			Alert.alert(
-				'Permissão necessária',
-				'Permita que sua aplicação acesse as imagens'
-			);
-		} else {
-			const { assets, canceled } = await ImagePicker.launchImageLibraryAsync({
-				allowsEditing: true,
-				mediaTypes: ImagePicker.MediaTypeOptions.Images,
-				base64: false,
-				aspect: [4, 4],
-				quality: 1,
-			});
+  const handleCloseModal = () => {
+    setModalVisible(false);
+  };
 
-			if (canceled) {
-				ToastAndroid.show('Operação cancelada', ToastAndroid.SHORT);
-			} else {
-				setHeaderImage(assets[0]?.uri);
-			}
-		}
-	};
+  const addImage = async () => {
+    const { granted } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!granted) {
+      Alert.alert(
+        "Permissão necessária",
+        "Permita que sua aplicação acesse as imagens"
+      );
+    } else {
+      const { assets, canceled } = await ImagePicker.launchImageLibraryAsync({
+        allowsEditing: true,
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        base64: false,
+        aspect: [4, 4],
+        quality: 1,
+      });
 
-	const deleteImage = (indexToDelete: number) => {
-		const updatedImages = images.filter(
-			(_: any, index: number) => index !== indexToDelete
-		);
-		setImages(updatedImages);
-	};
+      if (canceled) {
+        ToastAndroid.show("Operação cancelada", ToastAndroid.SHORT);
+      } else {
+        setImages([...images, assets[0]?.uri]);
+      }
+    }
+  };
 
-	const toggleMealInputVisibility = (meal: string) => {
-		setMealInputsVisible((prevState: any) => ({
-			...prevState,
-			[meal]: !prevState[meal],
-		}));
-	};
+  const changeHeaderImage = async () => {
+    const { granted } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!granted) {
+      Alert.alert(
+        "Permissão necessária",
+        "Permita que sua aplicação acesse as imagens"
+      );
+    } else {
+      const { assets, canceled } = await ImagePicker.launchImageLibraryAsync({
+        allowsEditing: true,
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        base64: false,
+        aspect: [4, 4],
+        quality: 1,
+      });
 
-	const handleLocationSelect = (selectedLocation: string) => {
-		setLocation(selectedLocation);
-		setShowOptions(false);
-	};
+      if (canceled) {
+        ToastAndroid.show("Operação cancelada", ToastAndroid.SHORT);
+      } else {
+        setHeaderImage(assets[0]?.uri);
+      }
+    }
+  };
 
-	const handleOpenDatePicker = (mode: 'departure' | 'return') => {
-		setShowDatePicker(true);
-		setDatePickerMode(mode);
-	};
+  const deleteImage = (indexToDelete: number) => {
+    const updatedImages = images.filter(
+      (_: any, index: number) => index !== indexToDelete
+    );
+    setImages(updatedImages);
+  };
 
-	const handleDateChange = (event: any, selectedDate: Date | undefined) => {
-		setShowDatePicker(false);
-		if (selectedDate !== undefined) {
-			if (datePickerMode === 'departure') {
-				setFlightDepartureDate(selectedDate);
-			} else {
-				setFlightReturnDate(selectedDate);
-			}
-		}
-	};
+  const handleLocationSelect = (selectedLocation: string) => {
+    setLocation(selectedLocation);
+    setShowOptions(false);
+  };
 
-	return (
-		<View style={styles.container}>
-			<TouchableOpacity onPress={handleOpenModal}>
-				<View style={styles.iconContainer}>
-					<Ionicons name='create-outline' size={32} color='#22172A' />
-				</View>
-			</TouchableOpacity>
+  const handleOpenDatePicker = (mode: "departure" | "return") => {
+    setShowDatePicker(true);
+    setDatePickerMode(mode);
+  };
 
-			<Modal
-				animationType='slide'
-				transparent={true}
-				visible={modalVisible}
-				onRequestClose={handleCloseModal}
-			>
-				<View style={styles.overlay} />
-				<View style={styles.modalContainer}>
-					<KeyboardAvoidingView
-						style={styles.modalContent}
-						behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-					>
-						<ScrollView contentContainerStyle={styles.scrollViewContent}>
-							<View style={styles.header}>
-								<Image
-									source={{ uri: headerImage }}
-									style={styles.headerImage}
-								/>
-								<TouchableOpacity
-									style={styles.changeButton}
-									onPress={changeHeaderImage}
-								>
-									<Ionicons name='create-outline' size={24} color='#FFF' />
-								</TouchableOpacity>
-							</View>
-							<TextInput
-								style={styles.input}
-								placeholder='Título da viagem'
-								value={title}
-								onChangeText={setTitle}
-							/>
-							<TextInput
-								style={styles.input}
-								placeholder='Location'
-								value={location}
-								onChangeText={(text) => {
-									setLocation(text);
-									setShowOptions(true);
-									searchLocations(text);
-								}}
-							/>
+  const handleDateChange = (event: any, selectedDate: Date | undefined) => {
+    setShowDatePicker(false);
+    if (selectedDate !== undefined) {
+      if (datePickerMode === "departure") {
+        setFlightDepartureDate(selectedDate);
+      } else {
+        setFlightReturnDate(selectedDate);
+      }
+    }
+  };
 
-							{showOptions && (
-								<View style={styles.optionsContainer}>
-									{locationOptions.map(
-										(option: LocationOption, index: number) => (
-											<TouchableOpacity
-												key={index}
-												onPress={() => handleLocationSelect(option.name)}
-												style={styles.optionItem}
-											>
-												<Text>
-													{option.name} - {option.country}
-												</Text>
-											</TouchableOpacity>
-										)
-									)}
-								</View>
-							)}
+  const createTrip = async () => {
+    setLoading(true);
 
-							<TextInput
-								style={styles.input}
-								placeholder='Hospedagem'
-								value={accommodation}
-								onChangeText={setAccommodation}
-							/>
-							<TextInput
-								style={styles.input}
-								placeholder='Duração da hospedagem (em dias)'
-								value={accommodationDuration}
-								onChangeText={setAccommodationDuration}
-								keyboardType='numeric'
-							/>
+    try {
+      const tripData = {
+        title,
+        location,
+        headerImage,
+        accommodation,
+        accommodationDuration,
+        accommodationPrice,
+        flightDepartureDate,
+        flightReturnDate,
+        flightCost,
+        images,
+        meals: {
+          breakfast: meals.breakfast.checked ? meals.breakfast.value : null,
+          lunch: meals.lunch.checked ? meals.lunch.value : null,
+          dinner: meals.dinner.checked ? meals.dinner.value : null,
+        },
+        userId: "b34830b1-8cf7-4dba-851b-7b4df8e88286",
+      };
 
-							<View style={styles.inputContainer}>
-								<TouchableOpacity
-									style={styles.inputTouchable}
-									onPress={() => handleOpenDatePicker('departure')}
-								>
-									<Text style={styles.inputLabel}>Data de partida do voo:</Text>
-									<Text style={styles.inputText}>
-										{format(flightDepartureDate, 'dd/MM/yyyy')}
-									</Text>
-								</TouchableOpacity>
-								<TouchableOpacity
-									style={styles.inputTouchable}
-									onPress={() => handleOpenDatePicker('return')}
-								>
-									<Text style={styles.inputLabel}>Data de retorno do voo:</Text>
-									<Text style={styles.inputText}>
-										{format(flightReturnDate, 'dd/MM/yyyy')}
-									</Text>
-								</TouchableOpacity>
-							</View>
+      const response = await apiClient().post("/trips/create", tripData);
 
-							{showDatePicker && (
-								<DateTimePicker
-									value={
-										datePickerMode === 'departure'
-											? flightDepartureDate
-											: flightReturnDate
-									}
-									mode='date'
-									display='inline'
-									locale='pt-BR'
-									timeZoneOffsetInMinutes={-180}
-									onChange={handleDateChange}
-								/>
-							)}
+      if (response.status === 201) {
+        Alert.alert("Sucesso", "Viagem cadastrada com sucesso!");
+        updateCallbackTrips((prevRefresh: any) => !prevRefresh);
 
-							<TextInput
-								style={styles.input}
-								placeholder='Custo do voo'
-								value={flightCost}
-								onChangeText={setFlightCost}
-								keyboardType='numeric'
-							/>
+        handleCloseModal();
+      }
+    } catch (error: any) {
+      setError(error);
+      Alert.alert("Erro", "Erro ao criar viagem.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-							<View style={styles.bottomContainer}>
-								<Text style={{ fontSize: 18, marginBottom: 10 }}>
-									Refeição:
-								</Text>
-								<View style={styles.checkboxContainer}>
-									<View style={styles.checkboxItem}>
-										<TouchableOpacity
-											onPress={() => {
-												setMealOptions({
-													...mealOptions,
-													breakfast: !mealOptions.breakfast,
-												});
-												toggleMealInputVisibility('breakfast');
-											}}
-										>
-											<Ionicons
-												name={
-													mealOptions.breakfast ? 'checkbox' : 'square-outline'
-												}
-												size={24}
-												color='#000'
-											/>
-										</TouchableOpacity>
-										<Text style={styles.checkboxText}>Café</Text>
-									</View>
-									<View style={styles.checkboxItem}>
-										<TouchableOpacity
-											onPress={() => {
-												setMealOptions({
-													...mealOptions,
-													lunch: !mealOptions.lunch,
-												});
-												toggleMealInputVisibility('lunch');
-											}}
-										>
-											<Ionicons
-												name={mealOptions.lunch ? 'checkbox' : 'square-outline'}
-												size={24}
-												color='#000'
-											/>
-										</TouchableOpacity>
-										<Text style={styles.checkboxText}>Almoço</Text>
-									</View>
-									<View style={styles.checkboxItem}>
-										<TouchableOpacity
-											onPress={() => {
-												setMealOptions({
-													...mealOptions,
-													dinner: !mealOptions.dinner,
-												});
-												toggleMealInputVisibility('dinner');
-											}}
-										>
-											<Ionicons
-												name={
-													mealOptions.dinner ? 'checkbox' : 'square-outline'
-												}
-												size={24}
-												color='#000'
-											/>
-										</TouchableOpacity>
-										<Text style={styles.checkboxText}>Jantar</Text>
-									</View>
-								</View>
+  const beautifyTitle = async () => {
+    setLoadingEbelizeTitle(true);
 
-								{mealInputsVisible.breakfast && (
-									<TextInput
-										style={styles.input}
-										placeholder='Valor do café'
-										onChangeText={(value) => {}}
-									/>
-								)}
-								{mealInputsVisible.lunch && (
-									<TextInput
-										style={styles.input}
-										placeholder='Valor do almoço'
-										onChangeText={(value) => {}}
-									/>
-								)}
-								{mealInputsVisible.dinner && (
-									<TextInput
-										style={styles.input}
-										placeholder='Valor do jantar'
-										onChangeText={(value) => {}}
-									/>
-								)}
+    try {
+      const { data } = await apiClient().post("/chat/embellish-title", {
+        title,
+      });
+      setTitle(data.response);
+    } catch (error) {
+    } finally {
+      setLoadingEbelizeTitle(false);
+    }
+  };
 
-								<View style={styles.imageSlider}>
-									<ScrollView horizontal>
-										{images.map((image: any, index: number) => (
-											<View key={index}>
-												<Image source={{ uri: image }} style={styles.image} />
-												<TouchableOpacity
-													style={styles.deleteButton}
-													onPress={() => deleteImage(index)}
-												>
-													<Ionicons
-														name='trash-outline'
-														size={24}
-														color='#FFF'
-													/>
-												</TouchableOpacity>
-											</View>
-										))}
-										<TouchableOpacity
-											style={styles.addButton}
-											onPress={addImage}
-										>
-											<Ionicons name='add' size={24} color='#FF7029' />
-										</TouchableOpacity>
-									</ScrollView>
-								</View>
-							</View>
-						</ScrollView>
-						<TouchableOpacity
-							onPress={handleCloseModal}
-							style={styles.closeButton}
-						>
-							<Text style={styles.closeButtonText}>Fechar</Text>
-						</TouchableOpacity>
-					</KeyboardAvoidingView>
-				</View>
-			</Modal>
-		</View>
-	);
+  if (loading) {
+    return (
+      <View style={styles.containerErrorWithLoading}>
+        <Loading />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.containerErrorWithLoading}>
+        <Text style={styles.errorText}>
+          Error fetching trips: {error.message}
+        </Text>
+      </View>
+    );
+  }
+
+  return (
+    <TouchableWithoutFeedback
+      onPress={() => {
+        Keyboard.dismiss();
+        setShowOptions(false);
+      }}
+    >
+      <View style={styles.container}>
+        <TouchableOpacity onPress={handleOpenModal}>
+          <View style={styles.iconContainer}>
+            <Ionicons name="create-outline" size={32} color="#22172A" />
+          </View>
+        </TouchableOpacity>
+
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={handleCloseModal}
+        >
+          <TouchableWithoutFeedback onPress={handleCloseModal}>
+            <View style={styles.overlay} />
+          </TouchableWithoutFeedback>
+          <View style={styles.modalContainer}>
+            <KeyboardAvoidingView
+              style={styles.modalContent}
+              behavior={Platform.OS === "ios" ? "padding" : "height"}
+            >
+              <ScrollView contentContainerStyle={styles.scrollViewContent}>
+                <View style={styles.header}>
+                  <Image
+                    source={{ uri: headerImage }}
+                    style={styles.headerImage}
+                  />
+                  <TouchableOpacity
+                    style={styles.changeButton}
+                    onPress={changeHeaderImage}
+                  >
+                    <Ionicons name="create-outline" size={24} color="#FFF" />
+                  </TouchableOpacity>
+                </View>
+                <View style={styles.inputTitleContainer}>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Ah vamos lá! Dê um nome bacana para sua Viagem"
+                    value={title}
+                    onChangeText={setTitle}
+                    editable={!loadingEmbelizeTitle} // Desativa o TextInput durante o carregamento
+                  />
+                  {title ? (
+                    <TouchableOpacity
+                      onPress={beautifyTitle}
+                      disabled={loadingEmbelizeTitle}
+                    >
+                      <Ionicons
+                        name="sparkles"
+                        color={loadingEmbelizeTitle ? "gray" : "#FF7029"}
+                        size={24}
+                      />
+                    </TouchableOpacity>
+                  ) : null}
+                </View>
+
+                <TextInput
+                  style={styles.input}
+                  placeholder="Nos conte para onde você está indo? Rio de Janeiro?"
+                  value={location}
+                  onChangeText={(text) => {
+                    setLocation(text);
+                    setShowOptions(true);
+                    searchLocations(text);
+                  }}
+                  onBlur={() => setShowOptions(false)}
+                />
+
+                {showOptions && (
+                  <View style={styles.optionsContainer}>
+                    {loadingSuggestions ? (
+                      <Loading />
+                    ) : (
+                      locationOptions.map(
+                        (option: LocationOption, index: number) => (
+                          <TouchableOpacity
+                            key={index}
+                            onPress={() => handleLocationSelect(option.name)}
+                            style={styles.optionItem}
+                          >
+                            <Text>
+                              {option.name} - {option.country}
+                            </Text>
+                          </TouchableOpacity>
+                        )
+                      )
+                    )}
+                  </View>
+                )}
+
+                <TextInput
+                  style={styles.input}
+                  placeholder="Qual nome do lugar que você vai se hospedar?"
+                  value={accommodation}
+                  onChangeText={setAccommodation}
+                />
+
+                <TextInput
+                  style={styles.input}
+                  placeholder="Duração da hospedagem (em dias)"
+                  value={accommodationDuration}
+                  onChangeText={setAccommodationDuration}
+                  keyboardType="numeric"
+                />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Valor da hospedagem"
+                  value={accommodationPrice}
+                  onChangeText={setAccommodationPrice}
+                  keyboardType="numeric"
+                />
+
+                <View style={styles.inputContainer}>
+                  <CheckBox
+                    title="Vai pegar avião?"
+                    checked={isFlying}
+                    onPress={() => setIsFlying(!isFlying)}
+                  />
+
+                  {isFlying && (
+                    <Fragment>
+                      <TouchableOpacity
+                        style={styles.inputTouchable}
+                        onPress={() => handleOpenDatePicker("departure")}
+                      >
+                        <Text style={styles.inputLabel}>
+                          Data de partida do voo:
+                        </Text>
+                        <Text style={styles.inputText}>
+                          {format(flightDepartureDate, "dd/MM/yyyy")}
+                        </Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={styles.inputTouchable}
+                        onPress={() => handleOpenDatePicker("return")}
+                      >
+                        <Text style={styles.inputLabel}>
+                          Data de retorno do voo:
+                        </Text>
+                        <Text style={styles.inputText}>
+                          {format(flightReturnDate, "dd/MM/yyyy")}
+                        </Text>
+                      </TouchableOpacity>
+
+                      {showDatePicker && (
+                        <DateTimePicker
+                          value={
+                            datePickerMode === "departure"
+                              ? flightDepartureDate
+                              : flightReturnDate
+                          }
+                          mode="date"
+                          display="inline"
+                          locale="pt-BR"
+                          timeZoneOffsetInMinutes={-180}
+                          onChange={handleDateChange}
+                        />
+                      )}
+
+                      <TextInput
+                        style={styles.input}
+                        placeholder="Custo do voo"
+                        value={flightCost}
+                        onChangeText={setFlightCost}
+                        keyboardType="numeric"
+                      />
+                    </Fragment>
+                  )}
+                </View>
+
+                <View style={styles.bottomContainer}>
+                  <Text style={{ fontSize: 18, marginBottom: 10 }}>
+                    Refeição:
+                  </Text>
+                  <View style={styles.checkboxContainer}>
+                    {Object.keys(meals).map((meal) => (
+                      <CheckBox
+                        key={meal}
+                        title={meal.charAt(0).toUpperCase() + meal.slice(1)}
+                        checked={meals[meal as keyof Meals].checked}
+                        onPress={() => toggleMealOption(meal as keyof Meals)}
+                      />
+                    ))}
+                  </View>
+
+                  {Object.keys(meals).map((meal) =>
+                    meals[meal as keyof Meals].visible ? (
+                      <TextInput
+                        key={meal}
+                        style={styles.input}
+                        keyboardType="numeric"
+                        placeholder={`Valor do ${meal}`}
+                        onChangeText={(value) =>
+                          updateMealValue(meal as keyof Meals, value)
+                        }
+                      />
+                    ) : null
+                  )}
+
+                  <View style={styles.imageSlider}>
+                    <ScrollView horizontal>
+                      {images.map((image: any, index: number) => (
+                        <View key={index}>
+                          <Image source={{ uri: image }} style={styles.image} />
+                          <TouchableOpacity
+                            style={styles.deleteButton}
+                            onPress={() => deleteImage(index)}
+                          >
+                            <Ionicons
+                              name="trash-outline"
+                              size={24}
+                              color="#FFF"
+                            />
+                          </TouchableOpacity>
+                        </View>
+                      ))}
+                      <TouchableOpacity
+                        style={styles.addButton}
+                        onPress={addImage}
+                      >
+                        <Ionicons name="add" size={24} color="#FF7029" />
+                      </TouchableOpacity>
+                    </ScrollView>
+                  </View>
+                </View>
+              </ScrollView>
+              <TouchableOpacity
+                onPress={createTrip} // Call createTrip function on press
+                style={styles.closeButton}
+              >
+                <Text style={styles.closeButtonText}>Cadastrar Viagem</Text>
+              </TouchableOpacity>
+            </KeyboardAvoidingView>
+          </View>
+        </Modal>
+      </View>
+    </TouchableWithoutFeedback>
+  );
 };
 
 const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-	},
-	iconContainer: {
-		alignItems: 'flex-end',
-	},
-	overlay: {
-		flex: 1,
-		backgroundColor: 'rgba(0,0,0,0.5)',
-	},
-	modalContainer: {
-		flex: 1,
-		justifyContent: 'flex-end',
-		alignItems: 'center',
-	},
-	modalContent: {
-		backgroundColor: 'white',
-		height: windowHeight * 0.8, // Alterado para ocupar 80% da tela
-		borderTopLeftRadius: 20,
-		borderTopRightRadius: 20,
-		width: '100%', // Garantindo que ocupa toda a largura
-	},
-	scrollViewContent: {
-		flexGrow: 1,
-		justifyContent: 'space-between',
-	},
-	header: {
-		width: '100%',
-		height: 150,
-	},
-	headerImage: {
-		width: '100%',
-		height: '100%',
-	},
-	changeButton: {
-		position: 'absolute',
-		right: 10,
-		bottom: 10,
-	},
-	image: {
-		width: 64,
-		height: 64,
-		marginBottom: 20,
-	},
-	closeButton: {
-		backgroundColor: '#FF7029',
-		padding: 18,
-		alignItems: 'center',
-		marginTop: 20,
-	},
-	closeButtonText: {
-		fontWeight: 'bold',
-		color: '#FFF',
-	},
-	input: {
-		width: '95%',
-		borderWidth: 1,
-		borderColor: '#ddd',
-		padding: 10,
-		margin: 10,
-		borderRadius: 6,
-	},
-	optionsContainer: {
-		marginTop: 10,
-	},
-	optionItem: {
-		paddingVertical: 10,
-		paddingHorizontal: 15,
-		borderBottomWidth: 1,
-		borderBottomColor: '#ddd',
-	},
-	imageSlider: {
-		marginTop: 20,
-	},
-	addButton: {
-		width: 64,
-		height: 64,
-		justifyContent: 'center',
-		alignItems: 'center',
-		borderWidth: 1,
-		borderColor: '#FF7029',
-		borderRadius: 5,
-		marginRight: 10,
-	},
-	deleteButton: {
-		position: 'absolute',
-		top: 5,
-		right: 15,
-		backgroundColor: 'rgba(0, 0, 0, 0.5)',
-		borderRadius: 12,
-		padding: 4,
-	},
-	checkboxContainer: {
-		flexDirection: 'row',
-		marginTop: 10,
-	},
-	checkboxItem: {
-		flexDirection: 'row',
-		alignItems: 'center',
-		marginBottom: 10,
-	},
-	checkboxText: {
-		margin: 10,
-		fontSize: 16,
-	},
-	bottomContainer: {
-		alignItems: 'center',
-	},
-	inputContainer: {
-		marginVertical: 10,
-	},
-	inputTouchable: {
-		borderWidth: 1,
-		borderColor: '#ddd',
-		padding: 10,
-		margin: 10,
-		borderRadius: 6,
-	},
-	inputLabel: {
-		fontSize: 16,
-		color: '#333',
-		marginBottom: 5,
-	},
-	inputText: {
-		fontSize: 14,
-		color: '#666',
-	},
+  container: {
+    flex: 1,
+  },
+  containerErrorWithLoading: {
+    flex: 1,
+    padding: 20,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  errorText: {
+    fontSize: 16,
+    color: "red",
+  },
+  iconContainer: {
+    alignItems: "flex-end",
+  },
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "flex-end",
+    alignItems: "center",
+  },
+  modalContent: {
+    backgroundColor: "white",
+    height: windowHeight * 0.8,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    width: "100%",
+  },
+  scrollViewContent: {
+    flexGrow: 1,
+    justifyContent: "space-between",
+  },
+  header: {
+    width: "100%",
+    height: 150,
+  },
+  headerImage: {
+    width: "100%",
+    height: "100%",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+  },
+  changeButton: {
+    position: "absolute",
+    right: 10,
+    bottom: 10,
+  },
+  image: {
+    width: 64,
+    height: 64,
+    marginBottom: 20,
+  },
+  closeButton: {
+    backgroundColor: "#FF7029",
+    padding: 18,
+    alignItems: "center",
+    marginTop: 20,
+  },
+  closeButtonText: {
+    fontWeight: "bold",
+    color: "#FFF",
+  },
+  input: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    padding: 10,
+    margin: 10,
+    borderRadius: 6,
+  },
+  optionsContainer: {
+    marginTop: 10,
+  },
+  optionItem: {
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ddd",
+  },
+  imageSlider: {
+    marginTop: 20,
+  },
+  addButton: {
+    width: 64,
+    height: 64,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#FF7029",
+    borderRadius: 5,
+    marginRight: 10,
+  },
+  deleteButton: {
+    position: "absolute",
+    top: 5,
+    right: 15,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    borderRadius: 12,
+    padding: 4,
+  },
+  checkboxContainer: {
+    flexDirection: "row",
+    marginTop: 10,
+  },
+  checkboxItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  checkboxText: {
+    margin: 10,
+    fontSize: 16,
+  },
+  bottomContainer: {
+    alignItems: "center",
+  },
+  inputContainer: {
+    marginVertical: 10,
+  },
+  inputTitleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginRight: 10,
+  },
+  inputTouchable: {
+    borderWidth: 1,
+    borderColor: "#ddd",
+    padding: 10,
+    margin: 10,
+    borderRadius: 6,
+  },
+  inputLabel: {
+    fontSize: 16,
+    color: "#333",
+    marginBottom: 5,
+  },
+  inputText: {
+    fontSize: 14,
+    color: "#666",
+  },
 });

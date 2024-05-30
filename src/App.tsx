@@ -1,26 +1,30 @@
-import { hideAsync, preventAutoHideAsync } from 'expo-splash-screen';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { useLoadFonts } from './fonts/useLoadFonts';
-import { Navigator } from './components/Navigator';
-import AppLoading from 'expo-app-loading';
+import React, { useEffect } from "react";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import { useLoadFonts } from "./fonts/useLoadFonts";
+import { Navigator } from "./components/Navigator";
+import * as SplashScreen from "expo-splash-screen";
 
-preventAutoHideAsync().catch(console.error);
+SplashScreen.preventAutoHideAsync().catch(console.error);
 
 export const App = () => {
-	const { areFontsLoaded } = useLoadFonts();
+  const { areFontsLoaded } = useLoadFonts();
 
-	if (!areFontsLoaded) {
-		return <AppLoading />;
-	}
+  useEffect(() => {
+    if (areFontsLoaded) {
+      SplashScreen.hideAsync().catch(console.error);
+    }
+  }, [areFontsLoaded]);
 
-	hideAsync().catch(console.error);
+  if (!areFontsLoaded) {
+    return null;
+  }
 
-	return (
-		<SafeAreaProvider>
-			<GestureHandlerRootView style={{ flex: 1 }}>
-				<Navigator />
-			</GestureHandlerRootView>
-		</SafeAreaProvider>
-	);
+  return (
+    <SafeAreaProvider>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <Navigator />
+      </GestureHandlerRootView>
+    </SafeAreaProvider>
+  );
 };
