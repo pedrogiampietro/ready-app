@@ -63,6 +63,7 @@ export const HomePage = () => {
           banner: trip.banner
             ? trip.banner
             : Image.resolveAssetSource(defaultImage).uri,
+          images: trip.images.map((image) => `http://localhost:3333/${image}`),
         }));
         setTrips(updatedData);
       } catch (error: any) {

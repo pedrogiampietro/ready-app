@@ -56,6 +56,7 @@ export const TravelCreationForm = ({ updateCallbackTrips }: any) => {
   const [location, setLocation] = useState("");
   const [locationOptions, setLocationOptions] = useState<LocationOption[]>([]);
   const [showOptions, setShowOptions] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
   const [images, setImages] = useState<any[]>([]);
   const [headerImage, setHeaderImage] = useState<any>(
     "https://www.remessaonline.com.br/blog/wp-content/uploads/2022/05/viagem-para-cancun.jpg"
@@ -119,6 +120,7 @@ export const TravelCreationForm = ({ updateCallbackTrips }: any) => {
       setLoadingSuggestions(false);
     }
   };
+
   const handleOpenModal = () => {
     setModalVisible(true);
   };
@@ -203,30 +205,54 @@ export const TravelCreationForm = ({ updateCallbackTrips }: any) => {
     }
   };
 
+  const handleClearLocationOptions = () => {
+    setLocationOptions([]);
+    setShowOptions(false);
+  };
+
   const createTrip = async () => {
     setLoading(true);
 
     try {
-      const tripData = {
-        title,
-        location,
-        headerImage,
-        accommodation,
-        accommodationDuration,
-        accommodationPrice,
-        flightDepartureDate,
-        flightReturnDate,
-        flightCost,
-        images,
-        meals: {
-          breakfast: meals.breakfast.checked ? meals.breakfast.value : null,
-          lunch: meals.lunch.checked ? meals.lunch.value : null,
-          dinner: meals.dinner.checked ? meals.dinner.value : null,
-        },
-        userId: "b34830b1-8cf7-4dba-851b-7b4df8e88286",
-      };
+      const formData = new FormData() as any;
+      formData.append("title", title);
+      formData.append("location", location);
+      formData.append("accommodation", accommodation);
+      formData.append("accommodationDuration", accommodationDuration);
+      formData.append("accommodationPrice", accommodationPrice);
+      formData.append("flightDepartureDate", flightDepartureDate.toString());
+      formData.append("flightReturnDate", flightReturnDate.toString());
+      formData.append("flightCost", flightCost);
+      formData.append("userId", "b34830b1-8cf7-4dba-851b-7b4df8e88286");
 
-      const response = await apiClient().post("/trips/create", tripData);
+      // Adicionando o banner
+      formData.append("banner", {
+        uri: headerImage,
+        type: "image/jpeg",
+        name: "banner.jpg",
+      });
+
+      // Adicionando as imagens
+      images.forEach((image, index) => {
+        formData.append("images", {
+          uri: image,
+          type: "image/jpeg",
+          name: `image_${index}.jpg`,
+        });
+      });
+
+      // Adicionando as refeições
+      Object.keys(meals).forEach((meal) => {
+        if (meals[meal as keyof Meals].checked) {
+          formData.append(`meals[${meal}]`, meals[meal as keyof Meals].value);
+        }
+      });
+
+      const response = await apiClient().post("/trips/create", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
       if (response.status === 201) {
         Alert.alert("Sucesso", "Viagem cadastrada com sucesso!");
@@ -321,7 +347,7 @@ export const TravelCreationForm = ({ updateCallbackTrips }: any) => {
                     placeholder="Ah vamos lá! Dê um nome bacana para sua Viagem"
                     value={title}
                     onChangeText={setTitle}
-                    editable={!loadingEmbelizeTitle} // Desativa o TextInput durante o carregamento
+                    editable={!loadingEmbelizeTitle}
                   />
                   {title ? (
                     <TouchableOpacity
@@ -346,28 +372,44 @@ export const TravelCreationForm = ({ updateCallbackTrips }: any) => {
                     setShowOptions(true);
                     searchLocations(text);
                   }}
-                  onBlur={() => setShowOptions(false)}
+                  onFocus={() => setIsFocused(true)}
+                  onBlur={() => {
+                    setTimeout(() => {
+                      if (!isFocused) {
+                        setShowOptions(false);
+                      }
+                    }, 100);
+                  }}
                 />
 
                 {showOptions && (
                   <View style={styles.optionsContainer}>
                     {loadingSuggestions ? (
-                      <Loading />
+                      <Text>
+                        Loading... <Loading />
+                      </Text>
                     ) : (
-                      locationOptions.map(
-                        (option: LocationOption, index: number) => (
-                          <TouchableOpacity
-                            key={index}
-                            onPress={() => handleLocationSelect(option.name)}
-                            style={styles.optionItem}
-                          >
-                            <Text>
-                              {option.name} - {option.country}
-                            </Text>
-                          </TouchableOpacity>
-                        )
-                      )
+                      locationOptions.map((option, index) => (
+                        <TouchableOpacity
+                          key={index}
+                          onPress={() => {
+                            handleLocationSelect(option.name);
+                            setIsFocused(false);
+                          }}
+                          style={styles.optionItem}
+                        >
+                          <Text>
+                            {option.name} - {option.country}
+                          </Text>
+                        </TouchableOpacity>
+                      ))
                     )}
+                    <TouchableOpacity
+                      onPress={handleClearLocationOptions}
+                      style={styles.clearButton}
+                    >
+                      <Text style={styles.clearButtonText}>Limpar</Text>
+                    </TouchableOpacity>
                   </View>
                 )}
 
@@ -470,7 +512,7 @@ export const TravelCreationForm = ({ updateCallbackTrips }: any) => {
                     meals[meal as keyof Meals].visible ? (
                       <TextInput
                         key={meal}
-                        style={styles.input}
+                        style={[styles.input, styles.fullWidthInput]}
                         keyboardType="numeric"
                         placeholder={`Valor do ${meal}`}
                         onChangeText={(value) =>
@@ -507,10 +549,7 @@ export const TravelCreationForm = ({ updateCallbackTrips }: any) => {
                   </View>
                 </View>
               </ScrollView>
-              <TouchableOpacity
-                onPress={createTrip} // Call createTrip function on press
-                style={styles.closeButton}
-              >
+              <TouchableOpacity onPress={createTrip} style={styles.closeButton}>
                 <Text style={styles.closeButtonText}>Cadastrar Viagem</Text>
               </TouchableOpacity>
             </KeyboardAvoidingView>
@@ -596,6 +635,9 @@ const styles = StyleSheet.create({
     margin: 10,
     borderRadius: 6,
   },
+  fullWidthInput: {
+    width: "95%",
+  },
   optionsContainer: {
     marginTop: 10,
   },
@@ -665,5 +707,16 @@ const styles = StyleSheet.create({
   inputText: {
     fontSize: 14,
     color: "#666",
+  },
+  clearButton: {
+    alignItems: "center",
+    marginTop: 10,
+    padding: 10,
+    backgroundColor: "#FF7029",
+    borderRadius: 6,
+  },
+  clearButtonText: {
+    color: "#FFF",
+    fontWeight: "bold",
   },
 });
