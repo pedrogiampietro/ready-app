@@ -48,7 +48,6 @@ interface Meals {
 
 export const TravelCreationForm = ({ updateCallbackTrips }: any) => {
   const [loading, setLoading] = useState(false);
-  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   const [loadingEmbelizeTitle, setLoadingEbelizeTitle] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
@@ -82,6 +81,21 @@ export const TravelCreationForm = ({ updateCallbackTrips }: any) => {
     dinner: { checked: false, value: "", visible: false },
   });
 
+  const [departureLocation, setDepartureLocation] = useState("");
+  const [destinationLocation, setDestinationLocation] = useState("");
+  const [departureLocationOptions, setDepartureLocationOptions] = useState<
+    LocationOption[]
+  >([]);
+  const [destinationLocationOptions, setDestinationLocationOptions] = useState<
+    LocationOption[]
+  >([]);
+  const [showDepartureOptions, setShowDepartureOptions] = useState(false);
+  const [showDestinationOptions, setShowDestinationOptions] = useState(false);
+  const [loadingDepartureSuggestions, setLoadingDepartureSuggestions] =
+    useState(false);
+  const [loadingDestinationSuggestions, setLoadingDestinationSuggestions] =
+    useState(false);
+
   const toggleMealOption = (meal: keyof Meals) => {
     setMeals({
       ...meals,
@@ -100,13 +114,17 @@ export const TravelCreationForm = ({ updateCallbackTrips }: any) => {
     });
   };
 
-  const searchLocations = async (query: string) => {
-    setLoadingSuggestions(true);
+  const searchLocations = async (
+    query: string,
+    setOptions: any,
+    setLoading: any
+  ) => {
+    setLoading(true);
     try {
       const response = await axios.get(
         `http://api.geonames.org/searchJSON?name_startsWith=${query}&maxRows=5&username=abhiaiyer`
       );
-      setLocationOptions(
+      setOptions(
         response.data.geonames.map((item: any) => ({
           name: item.name,
           country: item.countryName,
@@ -115,9 +133,9 @@ export const TravelCreationForm = ({ updateCallbackTrips }: any) => {
       );
     } catch (error) {
       console.error("Erro ao buscar localizações:", error);
-      setLocationOptions([]);
+      setOptions([]);
     } finally {
-      setLoadingSuggestions(false);
+      setLoading(false);
     }
   };
 
@@ -184,7 +202,11 @@ export const TravelCreationForm = ({ updateCallbackTrips }: any) => {
     setImages(updatedImages);
   };
 
-  const handleLocationSelect = (selectedLocation: string) => {
+  const handleLocationSelect = (
+    selectedLocation: string,
+    setLocation: any,
+    setShowOptions: any
+  ) => {
     setLocation(selectedLocation);
     setShowOptions(false);
   };
@@ -203,11 +225,6 @@ export const TravelCreationForm = ({ updateCallbackTrips }: any) => {
         setFlightReturnDate(selectedDate);
       }
     }
-  };
-
-  const handleClearLocationOptions = () => {
-    setLocationOptions([]);
-    setShowOptions(false);
   };
 
   const createTrip = async () => {
@@ -363,55 +380,133 @@ export const TravelCreationForm = ({ updateCallbackTrips }: any) => {
                   ) : null}
                 </View>
 
-                <TextInput
-                  style={styles.input}
-                  placeholder="Nos conte para onde você está indo? Rio de Janeiro?"
-                  value={location}
-                  onChangeText={(text) => {
-                    setLocation(text);
-                    setShowOptions(true);
-                    searchLocations(text);
-                  }}
-                  onFocus={() => setIsFocused(true)}
-                  onBlur={() => {
-                    setTimeout(() => {
-                      if (!isFocused) {
-                        setShowOptions(false);
-                      }
-                    }, 100);
-                  }}
-                />
-
-                {showOptions && (
-                  <View style={styles.optionsContainer}>
-                    {loadingSuggestions ? (
-                      <Text>
-                        Loading... <Loading />
-                      </Text>
-                    ) : (
-                      locationOptions.map((option, index) => (
-                        <TouchableOpacity
-                          key={index}
-                          onPress={() => {
-                            handleLocationSelect(option.name);
-                            setIsFocused(false);
-                          }}
-                          style={styles.optionItem}
-                        >
-                          <Text>
-                            {option.name} - {option.country}
-                          </Text>
-                        </TouchableOpacity>
-                      ))
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>
+                    Conta para gente, está saindo de onde?
+                  </Text>
+                  <View style={styles.inputWrapper}>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="De onde você está partindo? São Paulo?"
+                      value={departureLocation}
+                      onChangeText={(text) => {
+                        setDepartureLocation(text);
+                        setShowDepartureOptions(true);
+                        searchLocations(
+                          text,
+                          setDepartureLocationOptions,
+                          setLoadingDepartureSuggestions
+                        );
+                      }}
+                      onFocus={() => setIsFocused(true)}
+                      onBlur={() => {
+                        setTimeout(() => {
+                          if (!isFocused) {
+                            setShowDepartureOptions(false);
+                          }
+                        }, 100);
+                      }}
+                    />
+                    {departureLocation !== "" && (
+                      <TouchableOpacity
+                        onPress={() => setDepartureLocation("")}
+                        style={styles.clearIcon}
+                      >
+                        <Ionicons name="close-circle" size={24} color="gray" />
+                      </TouchableOpacity>
                     )}
-                    <TouchableOpacity
-                      onPress={handleClearLocationOptions}
-                      style={styles.clearButton}
-                    >
-                      <Text style={styles.clearButtonText}>Limpar</Text>
-                    </TouchableOpacity>
                   </View>
-                )}
+
+                  {showDepartureOptions && (
+                    <View style={styles.optionsContainer}>
+                      {loadingDepartureSuggestions ? (
+                        <Text>Loading...</Text>
+                      ) : (
+                        departureLocationOptions.map((option, index) => (
+                          <TouchableOpacity
+                            key={index}
+                            onPress={() => {
+                              handleLocationSelect(
+                                option.name,
+                                setDepartureLocation,
+                                setShowDepartureOptions
+                              );
+                              setIsFocused(false);
+                            }}
+                            style={styles.optionItem}
+                          >
+                            <Text>
+                              {option.name} - {option.country}
+                            </Text>
+                          </TouchableOpacity>
+                        ))
+                      )}
+                    </View>
+                  )}
+                </View>
+
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>E você está indo para onde?</Text>
+                  <View style={styles.inputWrapper}>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Nos conte para onde você está indo? São Paulo?"
+                      value={destinationLocation}
+                      onChangeText={(text) => {
+                        setDestinationLocation(text);
+                        setShowDestinationOptions(true);
+                        searchLocations(
+                          text,
+                          setDestinationLocationOptions,
+                          setLoadingDestinationSuggestions
+                        );
+                      }}
+                      onFocus={() => setIsFocused(true)}
+                      onBlur={() => {
+                        setTimeout(() => {
+                          if (!isFocused) {
+                            setShowDestinationOptions(false);
+                          }
+                        }, 100);
+                      }}
+                    />
+                    {destinationLocation !== "" && (
+                      <TouchableOpacity
+                        onPress={() => setDestinationLocation("")}
+                        style={styles.clearIcon}
+                      >
+                        <Ionicons name="close-circle" size={24} color="gray" />
+                      </TouchableOpacity>
+                    )}
+                  </View>
+
+                  {showDestinationOptions && (
+                    <View style={styles.optionsContainer}>
+                      {loadingDestinationSuggestions ? (
+                        <Text>Loading...</Text>
+                      ) : (
+                        destinationLocationOptions.map((option, index) => (
+                          <TouchableOpacity
+                            key={index}
+                            onPress={() => {
+                              handleLocationSelect(
+                                option.name,
+                                setDestinationLocation,
+                                setShowDestinationOptions
+                              );
+                              setIsFocused(false);
+                            }}
+                            style={styles.optionItem}
+                          >
+                            <Text>
+                              {option.name} - {option.country}
+                            </Text>
+                          </TouchableOpacity>
+                        ))
+                      )}
+                    </View>
+                  )}
+                </View>
 
                 <TextInput
                   style={styles.input}
@@ -718,5 +813,17 @@ const styles = StyleSheet.create({
   clearButtonText: {
     color: "#FFF",
     fontWeight: "bold",
+  },
+  label: {
+    marginBottom: 5,
+    fontSize: 16,
+    color: "#000",
+  },
+  inputWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  clearIcon: {
+    marginLeft: 5,
   },
 });

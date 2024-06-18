@@ -52,11 +52,6 @@ export const GenerateTravelWithIAPage = () => {
   const [loading, setLoading] = useState(false);
   const [travelPlan, setTravelPlan] = useState({});
   const [showModal, setShowModal] = useState(false);
-
-  const [location, setLocation] = useState("");
-  const [locationOptions, setLocationOptions] = useState<LocationOption[]>([]);
-  const [showOptions, setShowOptions] = useState(false);
-  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const [loadingDepartureSuggestions, setLoadingDepartureSuggestions] =
     useState(false);
@@ -176,11 +171,6 @@ export const GenerateTravelWithIAPage = () => {
     setShowOptions: any
   ) => {
     setLocation(selectedLocation);
-    setShowOptions(false);
-  };
-
-  const handleClearLocationOptions = (setOptions: any, setShowOptions: any) => {
-    setOptions([]);
     setShowOptions(false);
   };
 
@@ -477,12 +467,6 @@ const styles = StyleSheet.create({
   formContainer: {
     paddingBottom: 40,
   },
-  // label: {
-  //   fontSize: 16,
-  //   marginBottom: 10,
-  //   fontWeight: "bold",
-  //   color: "#333",
-  // },
   pickerContainer: {
     borderWidth: 1,
     borderColor: "#ddd",
