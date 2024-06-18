@@ -7,7 +7,7 @@ type HotelProps = {
   address: string;
   checkInDate: string;
   checkOutDate: string;
-  quantityBads: string;
+  budget: number;
   duration: string;
 };
 
@@ -16,7 +16,7 @@ export const HotelCard = ({
   address,
   checkInDate,
   checkOutDate,
-  quantityBads,
+  budget,
   duration,
 }: HotelProps) => {
   return (
@@ -38,8 +38,8 @@ export const HotelCard = ({
       </View>
       <View style={styles.checkInOutRow}>
         <View>
-          <Text style={styles.askTime}>Camas</Text>
-          <Text style={styles.answerTime}>{quantityBads}</Text>
+          <Text style={styles.askTime}>Orçamento</Text>
+          <Text style={styles.answerTime}>R$ {budget.toFixed(2)}</Text>
         </View>
         <View>
           <Text style={styles.askTime}>Duração</Text>

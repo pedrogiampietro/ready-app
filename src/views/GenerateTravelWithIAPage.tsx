@@ -53,6 +53,16 @@ export const GenerateTravelWithIAPage = () => {
   const [travelPlan, setTravelPlan] = useState({});
   const [showModal, setShowModal] = useState(false);
 
+  const [location, setLocation] = useState("");
+  const [locationOptions, setLocationOptions] = useState<LocationOption[]>([]);
+  const [showOptions, setShowOptions] = useState(false);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
+  const [loadingDepartureSuggestions, setLoadingDepartureSuggestions] =
+    useState(false);
+  const [loadingDestinationSuggestions, setLoadingDestinationSuggestions] =
+    useState(false);
+
   const activitiesItems = [
     { name: "Vida noturna", id: "vida noturna" },
     { name: "Museus", id: "museus" },
@@ -108,49 +118,26 @@ export const GenerateTravelWithIAPage = () => {
 
   const searchLocations = async (
     query: string,
-    type: "departure" | "destination"
+    setOptions: any,
+    setLoading: any
   ) => {
+    setLoading(true);
     try {
       const response = await axios.get(
         `http://api.geonames.org/searchJSON?name_startsWith=${query}&maxRows=5&username=abhiaiyer`
       );
-      if (type === "departure") {
-        setDepartureLocationOptions(
-          response.data.geonames.map((item: any) => ({
-            name: item.name,
-            country: item.countryName,
-            population: item.population,
-          }))
-        );
-      } else {
-        setDestinationLocationOptions(
-          response.data.geonames.map((item: any) => ({
-            name: item.name,
-            country: item.countryName,
-            population: item.population,
-          }))
-        );
-      }
+      setOptions(
+        response.data.geonames.map((item: any) => ({
+          name: item.name,
+          country: item.countryName,
+          population: item.population,
+        }))
+      );
     } catch (error) {
       console.error("Erro ao buscar localizações:", error);
-      if (type === "departure") {
-        setDepartureLocationOptions([]);
-      } else {
-        setDestinationLocationOptions([]);
-      }
-    }
-  };
-
-  const handleLocationSelect = (
-    selectedLocation: string,
-    type: "departure" | "destination"
-  ) => {
-    if (type === "departure") {
-      setDepartureLocation(selectedLocation);
-      setShowDepartureOptions(false);
-    } else {
-      setDestinationLocation(selectedLocation);
-      setShowDestinationOptions(false);
+      setOptions([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -181,6 +168,25 @@ export const GenerateTravelWithIAPage = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleLocationSelect = (
+    selectedLocation: string,
+    setLocation: any,
+    setShowOptions: any
+  ) => {
+    setLocation(selectedLocation);
+    setShowOptions(false);
+  };
+
+  const handleClearLocationOptions = (setOptions: any, setShowOptions: any) => {
+    setOptions([]);
+    setShowOptions(false);
+  };
+
+  const handleClearLocation = () => {
+    setDepartureLocation("");
+    setShowDepartureOptions(false);
   };
 
   return (
@@ -221,69 +227,132 @@ export const GenerateTravelWithIAPage = () => {
           </Text>
         </TouchableOpacity>
       </View>
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>Conta para gente, está saindo de onde?</Text>
+        <View style={styles.inputWrapper}>
+          <TextInput
+            style={styles.input}
+            placeholder="De onde você está partindo? São Paulo?"
+            value={departureLocation}
+            onChangeText={(text) => {
+              setDepartureLocation(text);
+              setShowDepartureOptions(true);
+              searchLocations(
+                text,
+                setDepartureLocationOptions,
+                setLoadingDepartureSuggestions
+              );
+            }}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => {
+              setTimeout(() => {
+                if (!isFocused) {
+                  setShowDepartureOptions(false);
+                }
+              }, 100);
+            }}
+          />
+          {departureLocation !== "" && (
+            <TouchableOpacity
+              onPress={handleClearLocation}
+              style={styles.clearIcon}
+            >
+              <Ionicons name="close-circle" size={24} color="gray" />
+            </TouchableOpacity>
+          )}
+        </View>
 
-      <View style={{ marginTop: 10 }}>
-        <Text style={styles.label}>Está partindo de onde?</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Ex: Rio de Janeiro"
-          value={departureLocation}
-          onChangeText={(text) => {
-            setDepartureLocation(text);
-            setShowDepartureOptions(true);
-            searchLocations(text, "departure");
-          }}
-        />
         {showDepartureOptions && (
           <View style={styles.optionsContainer}>
-            {departureLocationOptions.map(
-              (option: LocationOption, index: number) => (
+            {loadingDepartureSuggestions ? (
+              <Text>Loading...</Text>
+            ) : (
+              departureLocationOptions.map((option, index) => (
                 <TouchableOpacity
                   key={index}
-                  onPress={() => handleLocationSelect(option.name, "departure")}
+                  onPress={() => {
+                    handleLocationSelect(
+                      option.name,
+                      setDepartureLocation,
+                      setShowDepartureOptions
+                    );
+                    setIsFocused(false);
+                  }}
                   style={styles.optionItem}
                 >
                   <Text>
                     {option.name} - {option.country}
                   </Text>
                 </TouchableOpacity>
-              )
+              ))
             )}
           </View>
         )}
       </View>
-      <View>
-        <Text style={styles.label}>Está indo para onde?</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Ex: São Paulo"
-          value={destinationLocation}
-          onChangeText={(text) => {
-            setDestinationLocation(text);
-            setShowDestinationOptions(true);
-            searchLocations(text, "destination");
-          }}
-        />
+
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>E você está indo para onde?</Text>
+        <View style={styles.inputWrapper}>
+          <TextInput
+            style={styles.input}
+            placeholder="Nos conte para onde você está indo? São Paulo?"
+            value={destinationLocation}
+            onChangeText={(text) => {
+              setDestinationLocation(text);
+              setShowDestinationOptions(true);
+              searchLocations(
+                text,
+                setDestinationLocationOptions,
+                setLoadingDestinationSuggestions
+              );
+            }}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => {
+              setTimeout(() => {
+                if (!isFocused) {
+                  setShowDestinationOptions(false);
+                }
+              }, 100);
+            }}
+          />
+          {destinationLocation !== "" && (
+            <TouchableOpacity
+              onPress={() => setDestinationLocation("")}
+              style={styles.clearIcon}
+            >
+              <Ionicons name="close-circle" size={24} color="gray" />
+            </TouchableOpacity>
+          )}
+        </View>
+
         {showDestinationOptions && (
           <View style={styles.optionsContainer}>
-            {destinationLocationOptions.map(
-              (option: LocationOption, index: number) => (
+            {loadingDestinationSuggestions ? (
+              <Text>Loading...</Text>
+            ) : (
+              destinationLocationOptions.map((option, index) => (
                 <TouchableOpacity
                   key={index}
-                  onPress={() =>
-                    handleLocationSelect(option.name, "destination")
-                  }
+                  onPress={() => {
+                    handleLocationSelect(
+                      option.name,
+                      setDestinationLocation,
+                      setShowDestinationOptions
+                    );
+                    setIsFocused(false);
+                  }}
                   style={styles.optionItem}
                 >
                   <Text>
                     {option.name} - {option.country}
                   </Text>
                 </TouchableOpacity>
-              )
+              ))
             )}
           </View>
         )}
       </View>
+
       {showDatePicker && (
         <DateTimePicker
           value={
@@ -373,7 +442,7 @@ export const GenerateTravelWithIAPage = () => {
         visible={showModal}
         travelPlan={travelPlan}
         onClose={() => setShowModal(false)}
-        onSave={handleSaveTrip} // Pass the handleSaveTrip function
+        onSave={handleSaveTrip}
       />
     </ScrollView>
   );
@@ -408,12 +477,12 @@ const styles = StyleSheet.create({
   formContainer: {
     paddingBottom: 40,
   },
-  label: {
-    fontSize: 16,
-    marginBottom: 10,
-    fontWeight: "bold",
-    color: "#333",
-  },
+  // label: {
+  //   fontSize: 16,
+  //   marginBottom: 10,
+  //   fontWeight: "bold",
+  //   color: "#333",
+  // },
   pickerContainer: {
     borderWidth: 1,
     borderColor: "#ddd",
@@ -425,15 +494,6 @@ const styles = StyleSheet.create({
   picker: {
     height: 50,
     width: "100%",
-  },
-  input: {
-    height: 40,
-    borderColor: "#ddd",
-    borderWidth: 1,
-    marginBottom: 20,
-    paddingHorizontal: 10,
-    borderRadius: 4,
-    backgroundColor: "#fff",
   },
   switchContainer: {
     flexDirection: "row",
@@ -476,13 +536,60 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#666",
   },
+  // optionItem: {
+  //   paddingVertical: 10,
+  //   paddingHorizontal: 15,
+  //   borderBottomWidth: 1,
+  //   borderBottomColor: "#ddd",
+  // },
+  clearButton: {
+    alignItems: "center",
+    marginTop: 10,
+    padding: 10,
+    backgroundColor: "#FF7029",
+    borderRadius: 6,
+  },
+  clearButtonText: {
+    color: "#FFF",
+    fontWeight: "bold",
+  },
+  inputWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  input: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    padding: 10,
+    borderRadius: 6,
+  },
+  clearIcon: {
+    marginLeft: 5,
+  },
+  // input: {
+  //   height: 40,
+  //   borderColor: "#ddd",
+  //   borderWidth: 1,
+  //   marginBottom: 20,
+  //   paddingHorizontal: 10,
+  //   borderRadius: 4,
+  //   backgroundColor: "#fff",
+  // },
+  // optionsContainer: {
+  //   marginTop: 5,
+  // },
   optionsContainer: {
-    marginTop: 5,
+    marginTop: 10,
   },
   optionItem: {
-    paddingVertical: 10,
-    paddingHorizontal: 15,
+    padding: 10,
     borderBottomWidth: 1,
-    borderBottomColor: "#ddd",
+    borderBottomColor: "#ccc",
+  },
+  label: {
+    marginBottom: 5,
+    fontSize: 16,
+    color: "#000",
   },
 });

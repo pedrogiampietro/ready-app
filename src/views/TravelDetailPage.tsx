@@ -13,6 +13,7 @@ import { StatusBar } from "expo-status-bar";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
+import { formatDate } from "../utils";
 
 const { width, height } = Dimensions.get("window");
 
@@ -123,7 +124,7 @@ export const TravelDetailPage = () => {
               <Text style={styles.infoText}>
                 Data de Partida:{" "}
                 <Text style={styles.infoTextBold}>
-                  {new Date(trip.departureDate).toLocaleDateString()}
+                  {formatDate(trip.departureDate)}
                 </Text>
               </Text>
             </View>
@@ -132,7 +133,7 @@ export const TravelDetailPage = () => {
               <Text style={styles.infoText}>
                 Data de Retorno:{" "}
                 <Text style={styles.infoTextBold}>
-                  {new Date(trip.returnDate).toLocaleDateString()}
+                  {formatDate(trip.returnDate)}
                 </Text>
               </Text>
             </View>
@@ -204,7 +205,7 @@ export const TravelDetailPage = () => {
           /* ação do botão */
         }}
       >
-        <Ionicons name="share-social" size={24} color="#fff" />
+        <Ionicons name="heart-outline" size={22} color="#fff" />
       </TouchableOpacity>
     </View>
   );
@@ -367,8 +368,8 @@ const styles = StyleSheet.create({
     position: "absolute",
     right: 20,
     bottom: 20,
-    width: 56,
-    height: 56,
+    width: 42,
+    height: 42,
     borderRadius: 28,
     backgroundColor: "#FF7029",
     justifyContent: "center",

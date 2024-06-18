@@ -83,7 +83,7 @@ const GeneralScreen = ({ trip }: any) => {
         address={trip.destinationLocation}
         checkInDate={formatDate(trip.departureDate)}
         checkOutDate={formatDate(trip.returnDate)}
-        quantityBads="2"
+        budget={trip.budgetTravel}
         duration={trip.accommodationDuration.toString()}
       />
 
@@ -91,8 +91,8 @@ const GeneralScreen = ({ trip }: any) => {
         <Text style={[styles.infoTitle, { marginTop: 0 }]}>
           Gastos da Viagem
         </Text>
-        {travelExpenses.map((expense) => (
-          <Text key={expense.id}>
+        {travelExpenses.map((expense, index: number) => (
+          <Text key={index}>
             {expense.description.includes("Hospedagem")
               ? `${expense.description}: R$ ${expense.amount.toFixed(
                   2
