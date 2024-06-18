@@ -50,7 +50,7 @@ export const GenerateTravelWithIAPage = () => {
   const [showDepartureOptions, setShowDepartureOptions] = useState(false);
   const [showDestinationOptions, setShowDestinationOptions] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [travelPlan, setTravelPlan] = useState("");
+  const [travelPlan, setTravelPlan] = useState({});
   const [showModal, setShowModal] = useState(false);
 
   const activitiesItems = [
@@ -151,6 +151,35 @@ export const GenerateTravelWithIAPage = () => {
     } else {
       setDestinationLocation(selectedLocation);
       setShowDestinationOptions(false);
+    }
+  };
+
+  const handleSaveTrip = async () => {
+    setLoading(true);
+
+    const payload = {
+      travelPlan,
+      classLevel,
+      budget,
+      travelStyle,
+      selectedItems,
+      comfortableWithPublicTransport,
+      departureLocation,
+      destinationLocation,
+      flightDepartureDate,
+      flightReturnDate,
+      userId: "b8374eed-dca3-4e38-92d6-a70083531cea",
+    };
+
+    try {
+      await apiClient().post("/trips/save-with-ia", payload);
+      alert("Viagem salva com sucesso!");
+      setShowModal(false);
+    } catch (error) {
+      console.error("Erro ao salvar viagem:", error);
+      alert("Erro ao salvar viagem.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -344,6 +373,7 @@ export const GenerateTravelWithIAPage = () => {
         visible={showModal}
         travelPlan={travelPlan}
         onClose={() => setShowModal(false)}
+        onSave={handleSaveTrip} // Pass the handleSaveTrip function
       />
     </ScrollView>
   );

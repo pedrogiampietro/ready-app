@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   View,
@@ -7,37 +7,50 @@ import {
   Image,
   ScrollView,
   FlatList,
+  ActivityIndicator,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import { apiClient } from "../services/api";
+import { formatDate } from "../utils";
 
 export const CalendarPage = () => {
   const navigation = useNavigation() as any;
+  const [trips, setTrips] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const userId = "b8374eed-dca3-4e38-92d6-a70083531cea";
 
-  const [trips, setTrips] = useState<any>({
-    "2024-05-05": true,
-    "2024-06-15": true,
-    "2024-07-20": true,
-    "2024-08-31": true,
-  });
+  useEffect(() => {
+    const fetchTrips = async () => {
+      try {
+        const response = await apiClient().get(
+          `/trips/trips-by-user/${userId}`
+        );
+
+        setTrips(response.data);
+      } catch (error) {
+        console.error("Error fetching trips: ", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTrips();
+  }, []);
 
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
 
-  const handleBack = () => {
-    navigation.navigate("HomeTabs");
-  };
-
-  const handleTravelView = () => {
-    navigation.navigate("ViewTravelPage");
+  const handleTravelView = (trip: any) => {
+    navigation.navigate("ViewTravelPage", { trip });
   };
 
   const getDaysInMonth = (month: any, year: any) => {
-    return new Date(year, month, 0).getDate();
+    return new Date(year, month + 1, 0).getDate();
   };
 
-  const daysInMonth = getDaysInMonth(currentMonth + 1, currentYear);
+  const daysInMonth = getDaysInMonth(currentMonth, currentYear);
 
   const monthNames = [
     "Janeiro",
@@ -73,69 +86,14 @@ export const CalendarPage = () => {
     }
   };
 
-  const mockTrips = [
-    {
-      id: 1,
-      date: "26 Janeiro 2024",
-      title: "Jalapão",
-      location: "Brasil, Tocantins",
-      image:
-        "https://www.cvc.com.br/dicas-de-viagem/wp-content/uploads/2021/12/saiba-como-planejar-uma-viagem-nacional.png",
-    },
-    {
-      id: 2,
-      date: "26 Fevereiro 2024",
-      title: "Niladri Reservoir",
-      location: "Tekergat, Sunamgnj",
-      image:
-        "https://www.cvc.com.br/dicas-de-viagem/wp-content/uploads/2021/12/saiba-como-planejar-uma-viagem-nacional.png",
-    },
-    {
-      id: 3,
-      date: "26 Fevereiro 2024",
-      title: "Niladri Reservoir",
-      location: "Tekergat, Sunamgnj",
-      image:
-        "https://www.cvc.com.br/dicas-de-viagem/wp-content/uploads/2021/12/saiba-como-planejar-uma-viagem-nacional.png",
-    },
-    {
-      id: 4,
-      date: "26 Fevereiro 2024",
-      title: "Niladri Reservoir",
-      location: "Tekergat, Sunamgnj",
-      image:
-        "https://www.cvc.com.br/dicas-de-viagem/wp-content/uploads/2021/12/saiba-como-planejar-uma-viagem-nacional.png",
-    },
-    {
-      id: 5,
-      date: "26 Fevereiro 2024",
-      title: "Niladri Reservoir",
-      location: "Tekergat, Sunamgnj",
-      image:
-        "https://www.cvc.com.br/dicas-de-viagem/wp-content/uploads/2021/12/saiba-como-planejar-uma-viagem-nacional.png",
-    },
-    {
-      id: 6,
-      date: "26 Fevereiro 2024",
-      title: "Niladri Reservoir",
-      location: "Tekergat, Sunamgnj",
-      image:
-        "https://www.cvc.com.br/dicas-de-viagem/wp-content/uploads/2021/12/saiba-como-planejar-uma-viagem-nacional.png",
-    },
-  ];
-
   return (
     <View style={styles.container}>
       <StatusBar style="dark" />
-
       <View style={styles.header}>
-        <TouchableOpacity onPress={handleBack}>
-          <Ionicons name="arrow-back" size={24} color="#333" />
-        </TouchableOpacity>
+        <TouchableOpacity />
         <Text style={styles.headerTitle}>Calendário</Text>
         <Ionicons name="notifications-outline" size={24} color="#FF7029" />
       </View>
-
       <View>
         <View style={styles.monthRow}>
           <TouchableOpacity onPress={handlePrevMonth}>
@@ -148,7 +106,6 @@ export const CalendarPage = () => {
             <Ionicons name="arrow-forward" size={24} color="#FF7029" />
           </TouchableOpacity>
         </View>
-
         <ScrollView horizontal>
           {Array.from(
             { length: Math.ceil(daysInMonth / 7) },
@@ -164,9 +121,12 @@ export const CalendarPage = () => {
                 return (
                   <View key={date} style={styles.dayCard}>
                     <Text>{date}</Text>
-                    {trips[dateString] && (
-                      <Ionicons name="airplane" size={24} color="#FF7029" />
-                    )}
+                    {trips.some(
+                      (trip: any) =>
+                        new Date(trip.departureDate)
+                          .toISOString()
+                          .split("T")[0] === dateString
+                    ) && <Ionicons name="airplane" size={24} color="#FF7029" />}
                   </View>
                 );
               })}
@@ -174,41 +134,50 @@ export const CalendarPage = () => {
           ))}
         </ScrollView>
       </View>
-
       <Text style={styles.tripTitle}>Minhas viagens</Text>
-
-      <FlatList
-        data={mockTrips}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item, index }) => (
-          <TouchableOpacity onPress={handleTravelView}>
-            <View
-              style={[
-                styles.card,
-                index === mockTrips.length - 1 && styles.lastCard,
-              ]}
-            >
-              <Image style={styles.cardImage} source={{ uri: item.image }} />
-              <View style={styles.cardContent}>
-                <View style={styles.cardRow}>
-                  <Ionicons name="calendar" size={16} color="#FF7029" />
-                  <Text>{item.date}</Text>
+      {loading ? (
+        <ActivityIndicator size="large" color="#FF7029" />
+      ) : (
+        <FlatList
+          data={trips}
+          keyExtractor={(item: any) => item.id.toString()}
+          renderItem={({ item, index }) => (
+            <TouchableOpacity onPress={() => handleTravelView(item)}>
+              <View
+                style={[
+                  styles.card,
+                  index === trips.length - 1 && styles.lastCard,
+                ]}
+              >
+                <Image
+                  style={styles.cardImage}
+                  source={{
+                    uri: item.banner || "https://via.placeholder.com/100",
+                  }}
+                />
+                <View style={styles.cardContent}>
+                  <View style={styles.cardRow}>
+                    <Ionicons name="calendar" size={16} color="#FF7029" />
+                    <Text>{formatDate(item.departureDate)}</Text>
+                  </View>
+                  <Text
+                    style={[styles.tripTitle, { marginTop: 0, marginLeft: 0 }]}
+                  >
+                    {item.title}
+                  </Text>
+                  <View style={styles.cardRow}>
+                    <Ionicons name="location" size={16} color="#FF7029" />
+                    <Text style={{ color: "#7D848D" }}>
+                      {item.destinationLocation}
+                    </Text>
+                  </View>
                 </View>
-                <Text
-                  style={[styles.tripTitle, { marginTop: 0, marginLeft: 0 }]}
-                >
-                  {item.title}
-                </Text>
-                <View style={styles.cardRow}>
-                  <Ionicons name="location" size={16} color="#FF7029" />
-                  <Text style={{ color: "#7D848D" }}>{item.location}</Text>
-                </View>
+                <Ionicons name="arrow-forward" size={16} color="#FF7029" />
               </View>
-              <Ionicons name="arrow-forward" size={16} color="#FF7029" />
-            </View>
-          </TouchableOpacity>
-        )}
-      />
+            </TouchableOpacity>
+          )}
+        />
+      )}
     </View>
   );
 };

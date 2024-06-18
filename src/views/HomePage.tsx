@@ -63,8 +63,11 @@ export const HomePage = () => {
           banner: trip.banner
             ? trip.banner
             : Image.resolveAssetSource(defaultImage).uri,
-          images: trip.images.map((image) => `http://localhost:3333/${image}`),
+          images: trip.images.map(
+            (image) => `http://192.168.1.4:3333/${image}`
+          ),
         }));
+
         setTrips(updatedData);
       } catch (error: any) {
         setError(error);
@@ -76,8 +79,8 @@ export const HomePage = () => {
     fetchTrips();
   }, [refresh]);
 
-  const handleRedirectDetail = () => {
-    navigation.navigate("TravelDetailPage");
+  const handleRedirectDetail = (trip: Trip) => {
+    navigation.navigate("TravelDetailPage", { trip });
   };
 
   if (loading) {
@@ -131,15 +134,20 @@ export const HomePage = () => {
         alwaysBounceVertical
         showsHorizontalScrollIndicator={false}
       >
-        {trips.map((trip) => (
-          <TouchableOpacity key={trip.id} onPress={handleRedirectDetail}>
+        {trips.map((trip: any) => (
+          <TouchableOpacity
+            key={trip.id}
+            onPress={() => handleRedirectDetail(trip)}
+          >
             <View style={styles.card}>
               <Image style={styles.cardImage} source={{ uri: trip.banner }} />
               <Text style={styles.cardTitle}>{trip.title}</Text>
               <View style={styles.locationContainer}>
                 <View style={styles.locationGroup}>
                   <Ionicons name="location-outline" size={14} color="#22172A" />
-                  <Text style={styles.locationText}>{trip.locationName}</Text>
+                  <Text style={styles.locationText}>
+                    {trip.destinationLocation}
+                  </Text>
                 </View>
                 <View style={styles.likesContainer}>
                   <View style={styles.avatarsContainer}>
@@ -258,7 +266,7 @@ const styles = StyleSheet.create({
     height: "80%",
   },
   cardTitle: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: "bold",
     color: "#333",
     marginTop: 10,

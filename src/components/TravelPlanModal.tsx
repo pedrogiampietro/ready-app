@@ -11,15 +11,88 @@ import Markdown from "react-native-markdown-display";
 
 interface TravelPlanModalProps {
   visible: boolean;
-  travelPlan: string;
+  travelPlan: object;
   onClose: () => void;
+  onSave: () => void;
 }
 
 export const TravelPlanModal: React.FC<TravelPlanModalProps> = ({
   visible,
   travelPlan,
   onClose,
+  onSave,
 }) => {
+  const handleSave = async () => {
+    try {
+      await onSave();
+    } catch (error) {
+      console.error("Error saving trip:", error);
+    }
+  };
+
+  const formatTravelPlan = (plan: any) => {
+    let formattedPlan = `# Plano de Viagem\n\n`;
+
+    if (plan.voo) {
+      formattedPlan += `## Voo\n`;
+      formattedPlan += `**Companhia:** ${plan.voo.companhia}\n`;
+      formattedPlan += `**Preço:** ${plan.voo.preco}\n`;
+      formattedPlan += `**Data de Ida:** ${plan.voo.data.ida}\n`;
+      formattedPlan += `**Data de Volta:** ${plan.voo.data.volta}\n`;
+      formattedPlan += `**URL:** [${plan.voo.url}](${plan.voo.url})\n\n`;
+    }
+
+    if (plan.hospedagem) {
+      formattedPlan += `## Hospedagem\n`;
+      formattedPlan += `**Hotel:** ${plan.hospedagem.hotel}\n`;
+      formattedPlan += `**Preço:** ${plan.hospedagem.preco}\n`;
+      formattedPlan += `**URL:** [${plan.hospedagem.url}](${plan.hospedagem.url})\n\n`;
+    }
+
+    if (plan.restaurantes) {
+      formattedPlan += `## Restaurantes\n`;
+      plan.restaurantes.forEach((categoria: any) => {
+        formattedPlan += `### ${categoria.categoria}\n`;
+        categoria.locais.forEach((local: any) => {
+          formattedPlan += `- **Nome:** ${local.nome}\n`;
+          formattedPlan += `- **Preço:** ${local.preco}\n`;
+          formattedPlan += `- **URL:** [${local.url}](${local.url})\n\n`;
+        });
+      });
+    }
+
+    if (plan.roteiro) {
+      formattedPlan += `## Roteiro\n`;
+      plan.roteiro.forEach((dia: any) => {
+        formattedPlan += `### Dia ${dia.dia}\n`;
+        dia.atividades.forEach((atividade: any) => {
+          formattedPlan += `- ${atividade}\n`;
+        });
+        formattedPlan += `\n`;
+      });
+    }
+
+    if (plan.observacoes) {
+      formattedPlan += `## Observações\n`;
+      plan.observacoes.forEach((observacao: any) => {
+        formattedPlan += `- ${observacao}\n`;
+      });
+      formattedPlan += `\n`;
+    }
+
+    if (plan.dicas_extras) {
+      formattedPlan += `## Dicas Extras\n`;
+      plan.dicas_extras.forEach((dica: any) => {
+        formattedPlan += `- ${dica}\n`;
+      });
+      formattedPlan += `\n`;
+    }
+
+    return formattedPlan;
+  };
+
+  const formattedTravelPlan = formatTravelPlan(travelPlan);
+
   return (
     <Modal visible={visible} transparent={true} animationType="slide">
       <View style={styles.modalContainer}>
@@ -27,12 +100,16 @@ export const TravelPlanModal: React.FC<TravelPlanModalProps> = ({
           <Text style={styles.modalTitle}>Sua Viagem</Text>
           <ScrollView style={styles.modalScroll}>
             <Markdown style={styles.markdownStyle as any}>
-              {travelPlan}
+              {formattedTravelPlan}
             </Markdown>
           </ScrollView>
 
-          <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-            <Text style={styles.closeButtonText}>Fechar</Text>
+          <TouchableOpacity style={styles.button} onPress={onClose}>
+            <Text style={styles.buttonText}>Descartar</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.button} onPress={handleSave}>
+            <Text style={styles.buttonText}>Salvar nossa viagem</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -63,14 +140,16 @@ const styles = StyleSheet.create({
     maxHeight: "70%",
     width: "100%",
   },
-  closeButton: {
+  button: {
+    width: "100%",
     marginTop: 20,
     backgroundColor: "#FF7029",
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 5,
   },
-  closeButtonText: {
+  buttonText: {
+    textAlign: "center",
     color: "white",
     fontSize: 16,
     fontWeight: "bold",

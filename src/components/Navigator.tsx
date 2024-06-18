@@ -10,7 +10,7 @@ import { RegisterPage } from "../views/RegisterPage";
 import { HomePage } from "../views/HomePage";
 import { TravelDetailPage } from "../views/TravelDetailPage";
 import { CalendarPage } from "../views/CalendarPage";
-import { ViewTravelPage } from "../views/ViewTravelPage";
+import { ViewTravelPage } from "../views/ViewTravelPages";
 import { GenerateTravelWithIAPage } from "../views/GenerateTravelWithIAPage";
 
 export type RootStackParamList = {
