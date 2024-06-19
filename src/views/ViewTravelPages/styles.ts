@@ -134,20 +134,35 @@ const styles = StyleSheet.create({
   editButton: {
     backgroundColor: "#FF7029",
     padding: 10,
-    borderRadius: 5,
-    alignItems: "center",
+    borderRadius: 28,
     marginVertical: 10,
+    marginLeft: 20,
+    width: 42,
+    height: 42,
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
   },
   editButtonText: {
     color: "#FFF",
     fontWeight: "bold",
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginVertical: 10,
   },
   saveButton: {
     backgroundColor: "#4CAF50",
     padding: 10,
     borderRadius: 5,
     alignItems: "center",
-    marginVertical: 10,
+    flex: 1,
+    marginHorizontal: 5,
   },
   saveButtonText: {
     color: "#FFF",
@@ -226,11 +241,11 @@ const styles = StyleSheet.create({
     resizeMode: "cover",
   },
   imageStyle: {
-    opacity: 0.7, // Ajuste a opacidade da imagem conforme necessário
+    opacity: 0.7,
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0, 0, 0, 0.8)", // Fundo preto semitransparente
+    backgroundColor: "rgba(0, 0, 0, 0.8)",
   },
 });
 

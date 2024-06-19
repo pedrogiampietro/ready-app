@@ -236,7 +236,7 @@ const GeneralScreen = ({ trip, updateTripData }: any) => {
   return (
     <ScrollView>
       <ImageBackground
-        source={{ uri: trip.banner }}
+        source={{ uri: trip.banner || "https://via.placeholder.com/100" }}
         style={styles.backgroundImage}
         imageStyle={styles.imageStyle}
       >
@@ -244,9 +244,11 @@ const GeneralScreen = ({ trip, updateTripData }: any) => {
         <View style={{ alignItems: "center" }}>
           {isEditing ? (
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Título da Viagem:</Text>
+              <Text style={[styles.label, { color: "#fff" }]}>
+                Título da Viagem:
+              </Text>
               <TextInput
-                style={styles.input}
+                style={[styles.input, { color: "#fff" }]}
                 value={editedTrip.title}
                 onChangeText={(text) =>
                   setEditedTrip({ ...editedTrip, title: text })
@@ -417,16 +419,43 @@ const GeneralScreen = ({ trip, updateTripData }: any) => {
                 </View>
               ))}
               <TouchableOpacity style={styles.addButton} onPress={addImage}>
-                <Ionicons name="add" size={24} color="#FF7029" />
+                <Ionicons name="add" size={24} color="#fff" />
               </TouchableOpacity>
             </ScrollView>
           </View>
-          <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-            <Text style={styles.saveButtonText}>Salvar</Text>
-          </TouchableOpacity>
+
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+              <Text style={styles.saveButtonText}>Salvar</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.saveButton, { backgroundColor: "#333" }]}
+              onPress={() => setIsEditing(false)}
+            >
+              <Text style={styles.saveButtonText}>Cancelar</Text>
+            </TouchableOpacity>
+          </View>
         </>
       ) : (
         <>
+          <View style={{ flexDirection: "row", justifyContent: "center" }}>
+            <TouchableOpacity style={styles.editButton} onPress={handleEdit}>
+              <Text style={styles.editButtonText}>
+                <Ionicons name="pencil-outline" size={24} color="#FFF" />
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.editButton} onPress={handleEdit}>
+              <Text style={styles.editButtonText}>
+                <Ionicons name="trash-bin-outline" size={24} color="#FFF" />
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.editButton} onPress={handleEdit}>
+              <Text style={styles.editButtonText}>
+                <Ionicons name="eye-off-outline" size={24} color="#FFF" />
+              </Text>
+            </TouchableOpacity>
+          </View>
+
           <HotelCard
             hotelName={trip.hotelName}
             address={trip.destinationLocation}
@@ -491,9 +520,6 @@ const GeneralScreen = ({ trip, updateTripData }: any) => {
               Total das economias diárias: R$ {totalSavings.toFixed(2)}
             </Text>
           </View>
-          <TouchableOpacity style={styles.editButton} onPress={handleEdit}>
-            <Text style={styles.editButtonText}>Editar Viagem</Text>
-          </TouchableOpacity>
         </>
       )}
     </ScrollView>
