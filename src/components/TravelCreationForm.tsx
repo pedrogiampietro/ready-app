@@ -124,13 +124,15 @@ export const TravelCreationForm = ({ updateCallbackTrips }: any) => {
       const response = await axios.get(
         `http://api.geonames.org/searchJSON?name_startsWith=${query}&maxRows=5&username=abhiaiyer`
       );
-      setOptions(
-        response.data.geonames.map((item: any) => ({
+      // Limit the results to the first 3 items
+      const limitedResults = response.data.geonames
+        .slice(0, 3)
+        .map((item: any) => ({
           name: item.name,
           country: item.countryName,
           population: item.population,
-        }))
-      );
+        }));
+      setOptions(limitedResults);
     } catch (error) {
       console.error("Erro ao buscar localizações:", error);
       setOptions([]);
@@ -233,14 +235,15 @@ export const TravelCreationForm = ({ updateCallbackTrips }: any) => {
     try {
       const formData = new FormData() as any;
       formData.append("title", title);
-      formData.append("location", location);
+      formData.append("departureLocation", departureLocation);
+      formData.append("destinationLocation", destinationLocation);
       formData.append("accommodation", accommodation);
       formData.append("accommodationDuration", accommodationDuration);
       formData.append("accommodationPrice", accommodationPrice);
       formData.append("flightDepartureDate", flightDepartureDate.toString());
       formData.append("flightReturnDate", flightReturnDate.toString());
       formData.append("flightCost", flightCost);
-      formData.append("userId", "b34830b1-8cf7-4dba-851b-7b4df8e88286");
+      formData.append("userId", "b8374eed-dca3-4e38-92d6-a70083531cea");
 
       // Adicionando o banner
       formData.append("banner", {
@@ -381,9 +384,6 @@ export const TravelCreationForm = ({ updateCallbackTrips }: any) => {
                 </View>
 
                 <View style={styles.inputContainer}>
-                  <Text style={styles.label}>
-                    Conta para gente, está saindo de onde?
-                  </Text>
                   <View style={styles.inputWrapper}>
                     <TextInput
                       style={styles.input}
@@ -446,7 +446,6 @@ export const TravelCreationForm = ({ updateCallbackTrips }: any) => {
                 </View>
 
                 <View style={styles.inputContainer}>
-                  <Text style={styles.label}>E você está indo para onde?</Text>
                   <View style={styles.inputWrapper}>
                     <TextInput
                       style={styles.input}
@@ -524,7 +523,7 @@ export const TravelCreationForm = ({ updateCallbackTrips }: any) => {
                 />
                 <TextInput
                   style={styles.input}
-                  placeholder="Valor da hospedagem"
+                  placeholder="Valor total da hospedagem"
                   value={accommodationPrice}
                   onChangeText={setAccommodationPrice}
                   keyboardType="numeric"
@@ -779,9 +778,7 @@ const styles = StyleSheet.create({
   bottomContainer: {
     alignItems: "center",
   },
-  inputContainer: {
-    marginVertical: 10,
-  },
+  inputContainer: {},
   inputTitleContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -813,11 +810,6 @@ const styles = StyleSheet.create({
   clearButtonText: {
     color: "#FFF",
     fontWeight: "bold",
-  },
-  label: {
-    marginBottom: 5,
-    fontSize: 16,
-    color: "#000",
   },
   inputWrapper: {
     flexDirection: "row",

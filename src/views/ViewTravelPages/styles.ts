@@ -18,7 +18,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
     fontSize: 18,
     fontWeight: "bold",
-    color: "#333",
+    color: "#fff",
     textAlign: "center",
   },
   tabContainer: {
@@ -26,9 +26,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   infoTitle: {
-    fontSize: 20,
+    flex: 1,
+    marginHorizontal: 10,
+    fontSize: 18,
     fontWeight: "bold",
-    marginTop: 20,
+    textAlign: "center",
   },
   scrollViewStyle: {
     maxHeight: 200,
@@ -36,7 +38,7 @@ const styles = StyleSheet.create({
   },
   infoText: {
     fontSize: 16,
-    color: "#444",
+    color: "#fff",
     marginTop: 10,
     padding: 20,
   },
@@ -128,6 +130,107 @@ const styles = StyleSheet.create({
   itineraryDescription: {
     fontSize: 14,
     color: "#444",
+  },
+  editButton: {
+    backgroundColor: "#FF7029",
+    padding: 10,
+    borderRadius: 5,
+    alignItems: "center",
+    marginVertical: 10,
+  },
+  editButtonText: {
+    color: "#FFF",
+    fontWeight: "bold",
+  },
+  saveButton: {
+    backgroundColor: "#4CAF50",
+    padding: 10,
+    borderRadius: 5,
+    alignItems: "center",
+    marginVertical: 10,
+  },
+  saveButtonText: {
+    color: "#FFF",
+    fontWeight: "bold",
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#DDD",
+    borderRadius: 5,
+    padding: 10,
+    marginVertical: 5,
+    width: "100%",
+  },
+  inputContainer: {
+    width: "90%",
+    paddingHorizontal: 20,
+    marginVertical: 10,
+    alignSelf: "center",
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 5,
+  },
+  inputTouchable: {
+    backgroundColor: "#FFF",
+    padding: 10,
+    borderRadius: 5,
+    marginVertical: 5,
+    width: "90%",
+    alignSelf: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  inputLabel: {
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  inputText: {
+    fontSize: 16,
+    color: "#333",
+  },
+  bannerButton: {
+    width: "100%",
+    height: 150,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#DDD",
+    borderRadius: 5,
+  },
+  bannerImage: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 5,
+  },
+  imageSlider: {
+    marginTop: 10,
+  },
+  image: {
+    width: 64,
+    height: 64,
+    borderRadius: 5,
+    marginRight: 10,
+  },
+  deleteButton: {
+    position: "absolute",
+    top: 5,
+    right: 5,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    borderRadius: 12,
+    padding: 4,
+  },
+  backgroundImage: {
+    flex: 1,
+    resizeMode: "cover",
+  },
+  imageStyle: {
+    opacity: 0.7, // Ajuste a opacidade da imagem conforme necessário
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0, 0, 0, 0.8)", // Fundo preto semitransparente
   },
 });
 

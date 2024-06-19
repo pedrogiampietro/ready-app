@@ -39,7 +39,9 @@ export const HotelCard = ({
       <View style={styles.checkInOutRow}>
         <View>
           <Text style={styles.askTime}>Orçamento</Text>
-          <Text style={styles.answerTime}>R$ {budget.toFixed(2)}</Text>
+          <Text style={styles.answerTime}>
+            R$ {typeof budget === "number" ? budget.toFixed(2) : "0.00"}
+          </Text>
         </View>
         <View>
           <Text style={styles.askTime}>Duração</Text>
@@ -111,13 +113,3 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   },
 });
-
-// Exemplo de uso:
-// <HotelCard
-//   hotelName="Central Park Hotel"
-//   address="123 Main St, New York, NY"
-//   checkInDate="Jul 5, 8:00 PM EDT"
-//   checkOutDate="Jul 9, 9:00 AM EDT"
-//   quantityBads="ABC123"
-//   duration="4"
-// />

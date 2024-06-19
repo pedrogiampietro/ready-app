@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { Ionicons } from "@expo/vector-icons";
@@ -16,8 +16,14 @@ export const ViewTravelPage = () => {
   const route = useRoute();
   const { trip } = route.params as any;
 
+  const [updatedTrip, setUpdatedTrip] = useState(trip);
+
   const handleBack = () => {
     navigation.navigate("HomeTabs");
+  };
+
+  const updateTrip = (newTripData: any) => {
+    setUpdatedTrip({ ...updatedTrip, ...newTripData });
   };
 
   return (
@@ -28,8 +34,8 @@ export const ViewTravelPage = () => {
         <TouchableOpacity onPress={handleBack}>
           <Ionicons name="arrow-back" size={24} color="#333" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle} numberOfLines={1} ellipsizeMode="tail">
-          {trip.title}
+        <Text style={styles.infoTitle} numberOfLines={1} ellipsizeMode="tail">
+          {updatedTrip.title}
         </Text>
         <Ionicons name="notifications-outline" size={24} color="#FF7029" />
       </View>
@@ -46,13 +52,19 @@ export const ViewTravelPage = () => {
           }}
         >
           <Screen name="Geral">
-            {(props) => <GeneralScreen {...props} trip={trip} />}
+            {(props) => (
+              <GeneralScreen
+                {...props}
+                trip={updatedTrip}
+                updateTripData={updateTrip}
+              />
+            )}
           </Screen>
           <Screen name="Restaurantes">
-            {(props) => <RestaurantsScreen {...props} trip={trip} />}
+            {(props) => <RestaurantsScreen {...props} trip={updatedTrip} />}
           </Screen>
           <Screen name="Itinerários">
-            {(props) => <ItinerariesScreen {...props} trip={trip} />}
+            {(props) => <ItinerariesScreen {...props} trip={updatedTrip} />}
           </Screen>
         </Navigator>
       </View>
