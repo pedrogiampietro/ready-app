@@ -11,7 +11,7 @@ export function apiClient() {
   //   const user = JSON.parse(restoreUser);
 
   const api = axios.create({
-    baseURL: "http://192.168.1.4:3333",
+    baseURL: "http://192.168.0.68:3333",
     headers: {
       //   Authorization: `Bearer ${token}`,
       //   userId: user.userId,

@@ -12,6 +12,7 @@ import { TravelDetailPage } from "../views/TravelDetailPage";
 import { CalendarPage } from "../views/CalendarPage";
 import { ViewTravelPage } from "../views/ViewTravelPages";
 import { GenerateTravelWithIAPage } from "../views/GenerateTravelWithIAPage";
+import { useAuth } from "../hooks/useAuth";
 
 export type RootStackParamList = {
   HomeTabs: undefined;
@@ -97,29 +98,49 @@ const HomeTabs = () => {
   );
 };
 
-export const Navigator = () => (
-  <NavigationContainer>
-    <RootStack.Navigator
-      initialRouteName="HomeTabs"
-      screenOptions={{
-        headerShown: false,
-      }}
-    >
-      <RootStack.Screen name="OnboardWidePage" component={OnboardWidePage} />
-      <RootStack.Screen
-        name="OnboardExplorePage"
-        component={OnboardExplorePage}
-      />
-      <RootStack.Screen
-        name="OnboardPeoplePage"
-        component={OnboardPeoplePage}
-      />
-      <RootStack.Screen name="LoginPage" component={LoginPage} />
-      <RootStack.Screen name="RegisterPage" component={RegisterPage} />
-      <RootStack.Screen name="HomeTabs" component={HomeTabs} />
-      <RootStack.Screen name="HomePage" component={HomePage} />
-      <RootStack.Screen name="TravelDetailPage" component={TravelDetailPage} />
-      <RootStack.Screen name="ViewTravelPage" component={ViewTravelPage} />
-    </RootStack.Navigator>
-  </NavigationContainer>
-);
+export const Navigator = () => {
+  const { isLoggedIn } = useAuth();
+
+  return (
+    <NavigationContainer>
+      <RootStack.Navigator
+        initialRouteName={isLoggedIn ? "HomeTabs" : "LoginPage"}
+        screenOptions={{
+          headerShown: false,
+        }}
+      >
+        {isLoggedIn ? (
+          <>
+            <RootStack.Screen name="HomeTabs" component={HomeTabs} />
+            <RootStack.Screen name="HomePage" component={HomePage} />
+            <RootStack.Screen
+              name="TravelDetailPage"
+              component={TravelDetailPage}
+            />
+            <RootStack.Screen
+              name="ViewTravelPage"
+              component={ViewTravelPage}
+            />
+          </>
+        ) : (
+          <>
+            <RootStack.Screen
+              name="OnboardWidePage"
+              component={OnboardWidePage}
+            />
+            <RootStack.Screen
+              name="OnboardExplorePage"
+              component={OnboardExplorePage}
+            />
+            <RootStack.Screen
+              name="OnboardPeoplePage"
+              component={OnboardPeoplePage}
+            />
+            <RootStack.Screen name="LoginPage" component={LoginPage} />
+            <RootStack.Screen name="RegisterPage" component={RegisterPage} />
+          </>
+        )}
+      </RootStack.Navigator>
+    </NavigationContainer>
+  );
+};

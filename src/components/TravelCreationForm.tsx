@@ -52,8 +52,6 @@ export const TravelCreationForm = ({ updateCallbackTrips }: any) => {
   const [error, setError] = useState<Error | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [title, setTitle] = useState("");
-  const [location, setLocation] = useState("");
-  const [locationOptions, setLocationOptions] = useState<LocationOption[]>([]);
   const [showOptions, setShowOptions] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const [images, setImages] = useState<any[]>([]);

@@ -4,6 +4,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { useLoadFonts } from "./fonts/useLoadFonts";
 import { Navigator } from "./components/Navigator";
 import * as SplashScreen from "expo-splash-screen";
+import { AuthProvider } from "./context/AuthContext";
 
 SplashScreen.preventAutoHideAsync().catch(console.error);
 
@@ -23,7 +24,9 @@ export const App = () => {
   return (
     <SafeAreaProvider>
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <Navigator />
+        <AuthProvider>
+          <Navigator />
+        </AuthProvider>
       </GestureHandlerRootView>
     </SafeAreaProvider>
   );

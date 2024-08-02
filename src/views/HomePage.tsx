@@ -7,7 +7,6 @@ import {
   Dimensions,
   ScrollView,
   TouchableOpacity,
-  ActivityIndicator,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { Ionicons } from "@expo/vector-icons";
@@ -16,9 +15,10 @@ import { useNavigation } from "@react-navigation/native";
 import { TravelCreationForm } from "../components/TravelCreationForm";
 import { apiClient } from "../services/api";
 import { Loading } from "../components/Loading";
+import { useAuth } from "../hooks/useAuth";
 
 const { width, height } = Dimensions.get("window");
-const defaultImage = require("../../assets/no-img.jpg"); // Default image path
+const defaultImage = require("../../assets/no-img.jpg");
 
 interface Trip {
   id: string;
@@ -52,6 +52,7 @@ export const HomePage = () => {
   const [refresh, setRefresh] = useState(false);
 
   const navigation = useNavigation() as any;
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchTrips = async () => {
@@ -64,7 +65,7 @@ export const HomePage = () => {
             ? trip.banner
             : Image.resolveAssetSource(defaultImage).uri,
           images: trip.images.map(
-            (image) => `http://192.168.1.4:3333/${image}`
+            (image) => `http://192.168.0.68:3333/${image}`
           ),
         }));
 
@@ -81,6 +82,10 @@ export const HomePage = () => {
 
   const handleRedirectDetail = (trip: Trip) => {
     navigation.navigate("TravelDetailPage", { trip });
+  };
+
+  const handleProfileRedirect = () => {
+    navigation.navigate("ProfilePage");
   };
 
   if (loading) {
@@ -105,13 +110,17 @@ export const HomePage = () => {
     <View style={styles.container}>
       <StatusBar style="dark" />
       <View style={styles.header}>
-        <View style={styles.avatarContainer}>
-          <Image
-            style={styles.avatar}
-            source={{ uri: "https://github.com/pedrogiampietro.png" }}
-          />
-          <Text style={styles.userName}>Pedro Giampietro</Text>
-        </View>
+        <TouchableOpacity onPress={handleProfileRedirect}>
+          <View style={styles.avatarContainer}>
+            <Image
+              style={styles.avatar}
+              source={{
+                uri: user?.avatar || "https://github.com/pedrogiampietro.png",
+              }}
+            />
+            <Text style={styles.userName}>{user?.name}</Text>
+          </View>
+        </TouchableOpacity>
         <TravelCreationForm updateCallbackTrips={setRefresh} />
       </View>
       <View style={styles.textContainer}>
