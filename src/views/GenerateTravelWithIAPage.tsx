@@ -18,6 +18,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import axios from "axios";
 import { Loading } from "../components/Loading";
 import { TravelPlanModal } from "../components/TravelPlanModal";
+import { useAuth } from "../hooks/useAuth";
 
 interface LocationOption {
   name: string;
@@ -57,6 +58,8 @@ export const GenerateTravelWithIAPage = () => {
     useState(false);
   const [loadingDestinationSuggestions, setLoadingDestinationSuggestions] =
     useState(false);
+
+  const { user } = useAuth();
 
   const activitiesItems = [
     { name: "Vida noturna", id: "vida noturna" },
@@ -150,13 +153,14 @@ export const GenerateTravelWithIAPage = () => {
       destinationLocation,
       flightDepartureDate,
       flightReturnDate,
-      userId: "b8374eed-dca3-4e38-92d6-a70083531cea",
+      userId: user?.id,
     };
 
     try {
       await apiClient().post("/trips/save-with-ia", payload);
       alert("Viagem salva com sucesso!");
       setShowModal(false);
+      navigation.navigate("HomePage", { refresh: true }); // Navegar para a tela inicial com parâmetro de atualização
     } catch (error) {
       console.error("Erro ao salvar viagem:", error);
       alert("Erro ao salvar viagem.");
@@ -423,7 +427,7 @@ export const GenerateTravelWithIAPage = () => {
         disabled={loading}
       >
         {loading ? (
-          <Loading />
+          <Loading color="#FFF" />
         ) : (
           <Text style={styles.generateText}>Gerar Viagem</Text>
         )}

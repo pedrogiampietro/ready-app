@@ -303,7 +303,7 @@ export const TravelCreationForm = ({ updateCallbackTrips }: any) => {
   if (loading) {
     return (
       <View style={styles.containerErrorWithLoading}>
-        <Loading />
+        <Loading color="#FF7029" />
       </View>
     );
   }

@@ -22,8 +22,26 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   tabContainer: {
-    marginTop: 40,
     flex: 1,
+  },
+  tabBar: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    backgroundColor: "#FF7029",
+  },
+  tabButton: {
+    paddingVertical: 12,
+  },
+  tabText: {
+    fontSize: 16,
+    color: "#FFF",
+  },
+  activeTabText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#FFF",
+    borderBottomWidth: 2,
+    borderBottomColor: "#FFF",
   },
   infoTitle: {
     flex: 1,

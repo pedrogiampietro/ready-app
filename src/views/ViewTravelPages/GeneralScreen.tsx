@@ -1,4 +1,4 @@
-import React, { useState, Fragment } from "react";
+import React, { Fragment, useState } from "react";
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   Alert,
   ToastAndroid,
   ImageBackground,
+  ActivityIndicator,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import * as ImagePicker from "expo-image-picker";
@@ -19,21 +20,23 @@ import styles from "./styles";
 import { HotelCard } from "../../components/HotelCard";
 import { formatDate } from "../../utils";
 
-const GeneralScreen = ({ trip, updateTripData }: any) => {
+const GeneralScreen = ({ trip, updateTripData, deleteTripFromState }: any) => {
   const [showFullText, setShowFullText] = useState(false);
   const [dailySavings, setDailySavings] = useState<any>([]);
   const [savingsInput, setSavingsInput] = useState<any>("");
   const [isEditing, setIsEditing] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [datePickerMode, setDatePickerMode] = useState("departure");
-  const [flightDepartureDate, setFlightDepartureDate] = useState(
+  const [flightDepartureDate, setFlightDepartureDate] = useState<any>(
     trip.flightDepartureDate ? new Date(trip.flightDepartureDate) : new Date()
   );
-  const [flightReturnDate, setFlightReturnDate] = useState(
+  const [flightReturnDate, setFlightReturnDate] = useState<any>(
     trip.flightReturnDate ? new Date(trip.flightReturnDate) : new Date()
   );
   const [images, setImages] = useState<any[]>(trip.images || []);
   const [banner, setBanner] = useState<any>(trip.banner || "");
+  const [loading, setLoading] = useState(false);
+  const [loadingImage, setLoadingImage] = useState(false);
 
   const [editedTrip, setEditedTrip] = useState({
     title: trip.title,
@@ -56,6 +59,7 @@ const GeneralScreen = ({ trip, updateTripData }: any) => {
   };
 
   const handleSave = async () => {
+    setLoading(true);
     const formData = new FormData() as any;
 
     formData.append("title", editedTrip.title);
@@ -111,10 +115,13 @@ const GeneralScreen = ({ trip, updateTripData }: any) => {
     } catch (error) {
       console.error("Error updating trip:", error);
       Alert.alert("Erro", "Não foi possível atualizar a viagem.");
+    } finally {
+      setLoading(false);
     }
   };
 
   const addImage = async () => {
+    setLoadingImage(true);
     const { granted } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!granted) {
       Alert.alert(
@@ -136,9 +143,11 @@ const GeneralScreen = ({ trip, updateTripData }: any) => {
         setImages([...images, assets[0]?.uri]);
       }
     }
+    setLoadingImage(false);
   };
 
   const changeHeaderImage = async () => {
+    setLoadingImage(true);
     const { granted } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!granted) {
       Alert.alert(
@@ -160,7 +169,9 @@ const GeneralScreen = ({ trip, updateTripData }: any) => {
         setBanner(assets[0]?.uri);
       }
     }
+    setLoadingImage(false);
   };
+
   const handleOpenDatePicker = (mode: string) => {
     setDatePickerMode(mode);
     setShowDatePicker(true);
@@ -191,6 +202,36 @@ const GeneralScreen = ({ trip, updateTripData }: any) => {
     );
     setImages(updatedImages);
   };
+
+  const handleDeleteTrip = () => {
+    Alert.alert(
+      "Confirmação",
+      "Tem certeza de que deseja excluir esta viagem?",
+      [
+        {
+          text: "Cancelar",
+          style: "cancel",
+        },
+        {
+          text: "Excluir",
+          onPress: async () => {
+            try {
+              setLoading(true);
+              await apiClient().delete(`/trips/${trip.id}`);
+              deleteTripFromState(trip.id);
+              Alert.alert("Sucesso", "Viagem excluída com sucesso!");
+            } catch (error) {
+              console.error("Erro ao excluir viagem:", error);
+              Alert.alert("Erro", "Não foi possível excluir a viagem.");
+            } finally {
+              setLoading(false);
+            }
+          },
+        },
+      ]
+    );
+  };
+
   const startDate = new Date(trip.departureDate);
   const endDate = new Date(trip.returnDate);
   const initialNumberOfDays = Math.ceil(
@@ -199,7 +240,11 @@ const GeneralScreen = ({ trip, updateTripData }: any) => {
 
   const travelExpenses = [
     { id: 1, description: "Passagens aéreas", amount: trip.flightCost },
-    { id: 2, description: "Hospedagem", amount: trip.hotelPrice },
+    {
+      id: 2,
+      description: "Hospedagem",
+      amount: trip.hotelPrice * trip.accommodationDuration,
+    },
     { id: 3, description: "Alimentação", amount: trip.mealCost },
   ];
 
@@ -358,8 +403,7 @@ const GeneralScreen = ({ trip, updateTripData }: any) => {
             >
               <Text style={styles.inputLabel}>Data de partida do voo:</Text>
               <Text style={styles.inputText}>
-                {flightDepartureDate instanceof Date &&
-                !isNaN(flightDepartureDate)
+                {flightDepartureDate && !isNaN(flightDepartureDate)
                   ? format(flightDepartureDate, "dd/MM/yyyy")
                   : ""}
               </Text>
@@ -370,7 +414,7 @@ const GeneralScreen = ({ trip, updateTripData }: any) => {
             >
               <Text style={styles.inputLabel}>Data de retorno do voo:</Text>
               <Text style={styles.inputText}>
-                {flightReturnDate instanceof Date && !isNaN(flightReturnDate)
+                {flightReturnDate && !isNaN(flightReturnDate)
                   ? format(flightReturnDate, "dd/MM/yyyy")
                   : ""}
               </Text>
@@ -397,7 +441,9 @@ const GeneralScreen = ({ trip, updateTripData }: any) => {
               onPress={changeHeaderImage}
               style={styles.bannerButton}
             >
-              {banner ? (
+              {loadingImage ? (
+                <ActivityIndicator color="#FFF" />
+              ) : banner ? (
                 <Image source={{ uri: banner }} style={styles.bannerImage} />
               ) : (
                 <Text>Adicionar Banner</Text>
@@ -419,18 +465,31 @@ const GeneralScreen = ({ trip, updateTripData }: any) => {
                 </View>
               ))}
               <TouchableOpacity style={styles.addButton} onPress={addImage}>
-                <Ionicons name="add" size={24} color="#fff" />
+                {loadingImage ? (
+                  <ActivityIndicator color="#FFF" />
+                ) : (
+                  <Ionicons name="add" size={24} color="#fff" />
+                )}
               </TouchableOpacity>
             </ScrollView>
           </View>
 
           <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-              <Text style={styles.saveButtonText}>Salvar</Text>
+            <TouchableOpacity
+              style={styles.saveButton}
+              onPress={handleSave}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator color="#FFF" />
+              ) : (
+                <Text style={styles.saveButtonText}>Salvar</Text>
+              )}
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.saveButton, { backgroundColor: "#333" }]}
               onPress={() => setIsEditing(false)}
+              disabled={loading}
             >
               <Text style={styles.saveButtonText}>Cancelar</Text>
             </TouchableOpacity>
@@ -444,7 +503,10 @@ const GeneralScreen = ({ trip, updateTripData }: any) => {
                 <Ionicons name="pencil-outline" size={24} color="#FFF" />
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.editButton} onPress={handleEdit}>
+            <TouchableOpacity
+              style={styles.editButton}
+              onPress={handleDeleteTrip}
+            >
               <Text style={styles.editButtonText}>
                 <Ionicons name="trash-bin-outline" size={24} color="#FFF" />
               </Text>
@@ -495,8 +557,16 @@ const GeneralScreen = ({ trip, updateTripData }: any) => {
               value={savingsInput}
               onChangeText={setSavingsInput}
             />
-            <TouchableOpacity style={styles.addButton} onPress={addDailySaving}>
-              <Text style={styles.addButtonText}>Adicionar</Text>
+            <TouchableOpacity
+              style={styles.addButton}
+              onPress={addDailySaving}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator color="#FFF" />
+              ) : (
+                <Text style={styles.addButtonText}>Adicionar</Text>
+              )}
             </TouchableOpacity>
           </View>
           <View style={styles.expenseCard}>

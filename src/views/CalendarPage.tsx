@@ -11,33 +11,37 @@ import {
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useIsFocused } from "@react-navigation/native";
 import { apiClient } from "../services/api";
 import { formatDate } from "../utils";
+import { useAuth } from "../hooks/useAuth";
 
 export const CalendarPage = () => {
   const navigation = useNavigation() as any;
+  const isFocused = useIsFocused();
   const [trips, setTrips] = useState([]);
   const [loading, setLoading] = useState(true);
-  const userId = "b8374eed-dca3-4e38-92d6-a70083531cea";
+  const { user } = useAuth();
+
+  const fetchTrips = async () => {
+    try {
+      const response = await apiClient().get(
+        `/trips/trips-by-user/${user?.id}`
+      );
+      setTrips(response.data);
+    } catch (error) {
+      console.error("Error fetching trips: ", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchTrips = async () => {
-      try {
-        const response = await apiClient().get(
-          `/trips/trips-by-user/${userId}`
-        );
-
-        setTrips(response.data);
-      } catch (error) {
-        console.error("Error fetching trips: ", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchTrips();
-  }, []);
+    if (isFocused) {
+      setLoading(true);
+      fetchTrips();
+    }
+  }, [isFocused]);
 
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());

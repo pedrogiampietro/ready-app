@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Modal,
   View,
@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ScrollView,
   StyleSheet,
+  ActivityIndicator,
 } from "react-native";
 import Markdown from "react-native-markdown-display";
 
@@ -22,11 +23,16 @@ export const TravelPlanModal: React.FC<TravelPlanModalProps> = ({
   onClose,
   onSave,
 }) => {
+  const [loading, setLoading] = useState(false);
+
   const handleSave = async () => {
+    setLoading(true);
     try {
       await onSave();
     } catch (error) {
       console.error("Error saving trip:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -108,8 +114,16 @@ export const TravelPlanModal: React.FC<TravelPlanModalProps> = ({
             <Text style={styles.buttonText}>Descartar</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.button} onPress={handleSave}>
-            <Text style={styles.buttonText}>Salvar nossa viagem</Text>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={handleSave}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#FFF" />
+            ) : (
+              <Text style={styles.buttonText}>Salvar nossa viagem</Text>
+            )}
           </TouchableOpacity>
         </View>
       </View>
@@ -147,9 +161,9 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 5,
+    alignItems: "center",
   },
   buttonText: {
-    textAlign: "center",
     color: "white",
     fontSize: 16,
     fontWeight: "bold",

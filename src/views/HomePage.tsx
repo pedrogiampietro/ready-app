@@ -11,7 +11,7 @@ import {
 import { StatusBar } from "expo-status-bar";
 import { Ionicons } from "@expo/vector-icons";
 import { AvatarStack } from "../components/AvatarStack";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useIsFocused } from "@react-navigation/native";
 import { TravelCreationForm } from "../components/TravelCreationForm";
 import { apiClient } from "../services/api";
 import { Loading } from "../components/Loading";
@@ -52,6 +52,7 @@ export const HomePage = () => {
   const [refresh, setRefresh] = useState(false);
 
   const navigation = useNavigation() as any;
+  const isFocused = useIsFocused(); // Verifica se a página está em foco
   const { user } = useAuth();
 
   useEffect(() => {
@@ -78,7 +79,7 @@ export const HomePage = () => {
     };
 
     fetchTrips();
-  }, [refresh]);
+  }, [refresh, isFocused]); // Atualiza a lista de viagens quando a página está em foco
 
   const handleRedirectDetail = (trip: Trip) => {
     navigation.navigate("TravelDetailPage", { trip });
@@ -91,7 +92,7 @@ export const HomePage = () => {
   if (loading) {
     return (
       <View style={styles.containerErrorWithLoading}>
-        <Loading />
+        <Loading color="#FF7029" />
       </View>
     );
   }
@@ -115,7 +116,7 @@ export const HomePage = () => {
             <Image
               style={styles.avatar}
               source={{
-                uri: user?.avatar || "https://github.com/pedrogiampietro.png",
+                uri: "https://github.com/pedrogiampietro.png",
               }}
             />
             <Text style={styles.userName}>{user?.name}</Text>

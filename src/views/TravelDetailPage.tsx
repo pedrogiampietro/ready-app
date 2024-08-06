@@ -29,10 +29,7 @@ export const TravelDetailPage = () => {
     navigation.navigate("HomeTabs");
   };
 
-  const formattedTotalCost = new Intl.NumberFormat("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-  }).format(trip.totalCost);
+  const formattedCost = trip.totalCost.toLocaleString("pt-BR").split(",")[0];
 
   return (
     <View style={styles.container}>
@@ -77,7 +74,7 @@ export const TravelDetailPage = () => {
               >
                 R$
               </Text>
-              <Text style={styles.price}>{formattedTotalCost}</Text>
+              <Text style={styles.price}>{formattedCost}</Text>
             </View>
           </View>
 
@@ -143,6 +140,15 @@ export const TravelDetailPage = () => {
                 Duração da Acomodação:{" "}
                 <Text style={styles.infoTextBold}>
                   {trip.accommodationDuration} dias
+                </Text>
+              </Text>
+            </View>
+            <View style={styles.infoItem}>
+              <Ionicons name="bed-outline" size={20} color="#333" />
+              <Text style={styles.infoText}>
+                Custo da Acomodação:{" "}
+                <Text style={styles.infoTextBold}>
+                  R${trip.hotelPrice * trip.accommodationDuration}
                 </Text>
               </Text>
             </View>
