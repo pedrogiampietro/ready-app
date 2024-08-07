@@ -21,7 +21,7 @@ export const ProfilePage = () => {
   const navigation = useNavigation() as any;
   const [name, setName] = useState(user?.name || "");
   const [avatar, setAvatar] = useState(user?.avatar_url || "");
-  const [avatarUri, setAvatarUri] = useState(""); // Uri da imagem selecionada
+  const [avatarUri, setAvatarUri] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleLogout = () => {
@@ -74,13 +74,19 @@ export const ProfilePage = () => {
         },
       });
 
-      if (response.data.success) {
-        setUser(response.data.data);
+      if (response.status === 200) {
+        setUser({
+          ...user,
+          name: response.data.name,
+          avatar_url: response.data.avatar_url,
+          bucket_url: response.data.bucket_url,
+        });
         ToastAndroid.show("Perfil atualizado com sucesso!", ToastAndroid.SHORT);
       } else {
         ToastAndroid.show(response.data.message, ToastAndroid.SHORT);
       }
     } catch (error) {
+      console.log("error", error);
       ToastAndroid.show("Erro ao atualizar perfil.", ToastAndroid.SHORT);
     } finally {
       setLoading(false);

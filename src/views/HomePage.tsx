@@ -127,7 +127,9 @@ export const HomePage = () => {
             <Image
               style={styles.avatar}
               source={{
-                uri: "https://github.com/pedrogiampietro.png",
+                uri:
+                  `http://192.168.0.68:3333/tmp/avatars/${user?.avatar_url}` ||
+                  user?.bucket_url,
               }}
             />
             <Text style={styles.userName}>{user?.name}</Text>

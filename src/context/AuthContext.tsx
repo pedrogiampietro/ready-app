@@ -7,6 +7,7 @@ interface User {
   name: string;
   trips: Trip[];
   avatar_url: string;
+  bucket_url?: string;
 }
 
 interface Trip {
