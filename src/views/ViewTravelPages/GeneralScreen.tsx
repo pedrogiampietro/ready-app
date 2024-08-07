@@ -19,8 +19,9 @@ import { apiClient } from "../../services/api";
 import styles from "./styles";
 import { HotelCard } from "../../components/HotelCard";
 import { formatDate } from "../../utils";
+import { useNavigation } from "@react-navigation/native";
 
-const GeneralScreen = ({ trip, updateTripData, deleteTripFromState }: any) => {
+const GeneralScreen = ({ trip, updateTripData }: any) => {
   const [showFullText, setShowFullText] = useState(false);
   const [dailySavings, setDailySavings] = useState<any>([]);
   const [savingsInput, setSavingsInput] = useState<any>("");
@@ -53,6 +54,8 @@ const GeneralScreen = ({ trip, updateTripData, deleteTripFromState }: any) => {
     returnDate: trip.returnDate,
     userId: trip.userId,
   });
+
+  const navigation = useNavigation() as any;
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -218,7 +221,7 @@ const GeneralScreen = ({ trip, updateTripData, deleteTripFromState }: any) => {
             try {
               setLoading(true);
               await apiClient().delete(`/trips/${trip.id}`);
-              deleteTripFromState(trip.id);
+              navigation.navigate("HomePage");
               Alert.alert("Sucesso", "Viagem excluída com sucesso!");
             } catch (error) {
               console.error("Erro ao excluir viagem:", error);

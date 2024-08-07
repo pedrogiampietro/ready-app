@@ -25,50 +25,10 @@ export const ViewTravelPage = () => {
     setUpdatedTrip({ ...updatedTrip, ...newTripData });
   };
 
-  const deleteTripFromState = (tripId: string) => {
-    setUpdatedTrip((prevTrips: any[]) =>
-      prevTrips.filter((t) => t.id !== tripId)
-    );
-  };
-
-  const handleDeleteTrip = async (tripId: string) => {
-    Alert.alert(
-      "Confirmar Exclusão",
-      "Você tem certeza que deseja excluir esta viagem?",
-      [
-        {
-          text: "Cancelar",
-          style: "cancel",
-        },
-        {
-          text: "Excluir",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await apiClient().delete(`/trips/${tripId}`);
-              deleteTripFromState(tripId);
-              Alert.alert("Sucesso", "Viagem excluída com sucesso!");
-              handleBack(); // Volta para a tela anterior após a exclusão
-            } catch (error) {
-              console.error("Erro ao excluir viagem:", error);
-              Alert.alert("Erro", "Não foi possível excluir a viagem.");
-            }
-          },
-        },
-      ]
-    );
-  };
-
   const renderActiveTab = () => {
     switch (activeTab) {
       case "Geral":
-        return (
-          <GeneralScreen
-            trip={updatedTrip}
-            updateTripData={updateTrip}
-            deleteTripFromState={deleteTripFromState}
-          />
-        );
+        return <GeneralScreen trip={updatedTrip} updateTripData={updateTrip} />;
       case "Restaurantes":
         return <RestaurantsScreen trip={updatedTrip} />;
       case "Itinerários":
@@ -77,10 +37,6 @@ export const ViewTravelPage = () => {
         return null;
     }
   };
-
-  useEffect(() => {
-    console.log("Tab ativa mudou para:", activeTab);
-  }, [activeTab]);
 
   return (
     <View style={styles.container}>

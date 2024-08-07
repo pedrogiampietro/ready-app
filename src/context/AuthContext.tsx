@@ -6,6 +6,7 @@ interface User {
   email: string;
   name: string;
   trips: Trip[];
+  avatar_url: string;
 }
 
 interface Trip {
@@ -19,6 +20,7 @@ interface AuthProviderProps {
 
 interface AuthContextType {
   user: User | null;
+  setUser: any;
   isLoggedIn: boolean;
   login: (userData: User) => void;
   logout: () => void;
@@ -56,7 +58,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const isLoggedIn = user !== null;
 
   return (
-    <AuthContext.Provider value={{ user, isLoggedIn, login, logout }}>
+    <AuthContext.Provider value={{ user, setUser, isLoggedIn, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

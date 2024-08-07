@@ -31,19 +31,30 @@ interface Trip {
   hotelName: string;
   hotelPrice: number;
   departureDate: string;
+  destinationLocation: string;
   returnDate: string;
   flightCost: number;
   mealCost: number;
   totalCost: number;
   userId: string;
-  reviews: Reviews;
+  reviews: Review[];
 }
 
-type Reviews = {
+interface Review {
+  id: string;
+  content: string;
   rating: number;
-  likes: number;
-  comment: string;
-};
+  tripId: string;
+  userId: string;
+  user: User;
+}
+
+interface User {
+  id: string;
+  email: string;
+  avatar_url: string;
+  name: string;
+}
 
 export const HomePage = () => {
   const [trips, setTrips] = useState<Trip[]>([]);
@@ -52,7 +63,7 @@ export const HomePage = () => {
   const [refresh, setRefresh] = useState(false);
 
   const navigation = useNavigation() as any;
-  const isFocused = useIsFocused(); // Verifica se a página está em foco
+  const isFocused = useIsFocused();
   const { user } = useAuth();
 
   useEffect(() => {
@@ -79,7 +90,7 @@ export const HomePage = () => {
     };
 
     fetchTrips();
-  }, [refresh, isFocused]); // Atualiza a lista de viagens quando a página está em foco
+  }, [refresh, isFocused]);
 
   const handleRedirectDetail = (trip: Trip) => {
     navigation.navigate("TravelDetailPage", { trip });
@@ -144,7 +155,7 @@ export const HomePage = () => {
         alwaysBounceVertical
         showsHorizontalScrollIndicator={false}
       >
-        {trips.map((trip: any) => (
+        {trips.map((trip: Trip) => (
           <TouchableOpacity
             key={trip.id}
             onPress={() => handleRedirectDetail(trip)}
@@ -161,12 +172,20 @@ export const HomePage = () => {
                 </View>
                 <View style={styles.likesContainer}>
                   <View style={styles.avatarsContainer}>
-                    {Object.keys(trip.reviews).length > 0 ? (
+                    {trip.reviews.length > 0 ? (
                       <Fragment>
-                        <AvatarStack />
-                        <Text style={styles.likesText}>
-                          +{trip.reviews.likes}
-                        </Text>
+                        <AvatarStack
+                          avatars={trip.reviews.map(
+                            (review: Review) => review.user?.avatar_url
+                          )}
+                        />
+                        {trip.reviews.length > 3 ? (
+                          <Text style={styles.likesText}>
+                            +{trip.reviews.length}
+                          </Text>
+                        ) : (
+                          <Text></Text>
+                        )}
                       </Fragment>
                     ) : null}
                   </View>
@@ -266,7 +285,7 @@ const styles = StyleSheet.create({
   },
   card: {
     width: 238,
-    height: 320,
+    height: 360,
     borderRadius: 10,
     overflow: "hidden",
     marginRight: 20,
@@ -314,3 +333,5 @@ const styles = StyleSheet.create({
     color: "red",
   },
 });
+
+export default HomePage;

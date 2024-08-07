@@ -13,6 +13,7 @@ import { CalendarPage } from "../views/CalendarPage";
 import { ViewTravelPage } from "../views/ViewTravelPages";
 import { GenerateTravelWithIAPage } from "../views/GenerateTravelWithIAPage";
 import { useAuth } from "../hooks/useAuth";
+import { ProfilePage } from "../views/ProfilePage";
 
 export type RootStackParamList = {
   HomeTabs: undefined;
@@ -25,6 +26,7 @@ export type RootStackParamList = {
   TravelDetailPage: undefined;
   TravelCreationForm: undefined;
   ViewTravelPage: undefined;
+  ProfilePage: undefined;
 };
 
 const RootStack = createNativeStackNavigator<RootStackParamList>();
@@ -121,6 +123,7 @@ export const Navigator = () => {
               name="ViewTravelPage"
               component={ViewTravelPage}
             />
+            <RootStack.Screen name="ProfilePage" component={ProfilePage} />
           </>
         ) : (
           <>

@@ -160,7 +160,7 @@ export const GenerateTravelWithIAPage = () => {
       await apiClient().post("/trips/save-with-ia", payload);
       alert("Viagem salva com sucesso!");
       setShowModal(false);
-      navigation.navigate("HomePage", { refresh: true }); // Navegar para a tela inicial com parâmetro de atualização
+      navigation.navigate("HomePage", { refresh: true });
     } catch (error) {
       console.error("Erro ao salvar viagem:", error);
       alert("Erro ao salvar viagem.");

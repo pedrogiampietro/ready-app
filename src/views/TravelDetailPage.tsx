@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   View,
@@ -8,25 +8,76 @@ import {
   ScrollView,
   TouchableOpacity,
   FlatList,
+  Modal,
+  TextInput,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 import { formatDate } from "../utils";
+import { useAuth } from "../hooks/useAuth";
+import { apiClient } from "../services/api";
 
 const { width, height } = Dimensions.get("window");
 
 export const TravelDetailPage = () => {
   const navigation = useNavigation() as any;
   const route = useRoute();
-
   const { trip } = route.params as any;
+  const { user } = useAuth();
+
+  const [isLiked, setIsLiked] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState("");
+
+  useEffect(() => {
+    // Verificar se o usuário já deu like
+    const userReview = trip.reviews.find(
+      (review: any) => review.userId === user?.id
+    );
+    if (userReview) {
+      setIsLiked(true);
+    }
+  }, [trip.reviews, user?.id]);
 
   const imagesToShow = 5;
 
   const handleBack = () => {
     navigation.navigate("HomeTabs");
+  };
+
+  const handleLike = () => {
+    if (isLiked) {
+      // Se já deu like, pode implementar lógica de descurtir ou alertar o usuário
+      alert("Você já curtiu esta viagem.");
+    } else {
+      setModalVisible(true);
+    }
+  };
+
+  const handleSubmitReview = async () => {
+    try {
+      const reviewData = {
+        content: comment,
+        rating,
+        tripId: trip.id,
+        userId: user?.id,
+      };
+
+      await apiClient().post("http://seu-endereco-api/reviews", reviewData);
+      setIsLiked(true);
+      setModalVisible(false);
+    } catch (error) {
+      console.error("Erro ao enviar o review:", error);
+    }
+  };
+
+  const handleCancel = () => {
+    setModalVisible(false);
+    setRating(0);
+    setComment("");
   };
 
   const formattedCost = trip.totalCost.toLocaleString("pt-BR").split(",")[0];
@@ -205,14 +256,58 @@ export const TravelDetailPage = () => {
           ))}
         </ScrollView>
       </View>
-      <TouchableOpacity
-        style={styles.fab}
-        onPress={() => {
-          /* ação do botão */
-        }}
-      >
-        <Ionicons name="heart-outline" size={22} color="#fff" />
+      <TouchableOpacity style={styles.fab} onPress={handleLike}>
+        <Ionicons
+          name={isLiked ? "heart" : "heart-outline"}
+          size={22}
+          color="#fff"
+        />
       </TouchableOpacity>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={handleCancel}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Deixe sua Avaliação</Text>
+            <TextInput
+              style={styles.modalInput}
+              placeholder="Comentário"
+              value={comment}
+              onChangeText={setComment}
+            />
+            <Text style={styles.modalRatingLabel}>Nota:</Text>
+            <View style={styles.modalRatingContainer}>
+              {[1, 2, 3, 4, 5].map((star) => (
+                <TouchableOpacity key={star} onPress={() => setRating(star)}>
+                  <Ionicons
+                    name={rating >= star ? "star" : "star-outline"}
+                    size={32}
+                    color="#FFD336"
+                  />
+                </TouchableOpacity>
+              ))}
+            </View>
+            <View style={styles.modalButtonContainer}>
+              <TouchableOpacity
+                style={styles.modalButton}
+                onPress={handleSubmitReview}
+              >
+                <Text style={styles.modalButtonText}>Enviar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.modalButtonCancel}
+                onPress={handleCancel}
+              >
+                <Text style={styles.modalButtonText}>Cancelar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -226,7 +321,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingTop: 40,
+    marginTop: 30,
     paddingHorizontal: 20,
     paddingBottom: 10,
     borderBottomLeftRadius: 20,
@@ -386,4 +481,67 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
   },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    width: width * 0.8,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 20,
+    alignItems: "center",
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 20,
+  },
+  modalInput: {
+    width: "100%",
+    height: 40,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 5,
+    marginBottom: 20,
+    paddingHorizontal: 10,
+  },
+  modalRatingLabel: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  modalRatingContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginBottom: 20,
+  },
+  modalButtonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+  },
+  modalButton: {
+    backgroundColor: "#FF7029",
+    padding: 10,
+    borderRadius: 10,
+    flex: 1,
+    marginRight: 5,
+  },
+  modalButtonCancel: {
+    backgroundColor: "#ccc",
+    padding: 10,
+    borderRadius: 10,
+    flex: 1,
+    marginLeft: 5,
+  },
+  modalButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+    textAlign: "center",
+  },
 });
+
+export default TravelDetailPage;
