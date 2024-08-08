@@ -37,13 +37,14 @@ export const ProfilePage = () => {
         "Permita que sua aplicação acesse as imagens"
       );
     } else {
-      const { assets, canceled } = await ImagePicker.launchImageLibraryAsync({
-        allowsEditing: true,
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        base64: false,
-        aspect: [4, 4],
-        quality: 1,
-      });
+      const { assets, canceled }: any =
+        await ImagePicker.launchImageLibraryAsync({
+          allowsEditing: true,
+          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+          base64: false,
+          aspect: [4, 4],
+          quality: 1,
+        });
 
       if (canceled) {
         ToastAndroid.show("Operação cancelada", ToastAndroid.SHORT);
@@ -107,7 +108,12 @@ export const ProfilePage = () => {
         <View style={styles.avatarContainer}>
           <Image
             style={styles.avatar}
-            source={{ uri: avatar || "https://github.com/pedrogiampietro.png" }}
+            source={{
+              uri:
+                avatar.length <= 3
+                  ? `http://192.168.0.68:3333/tmp/${user?.avatar_url}`
+                  : user?.bucket_url,
+            }}
           />
           <TouchableOpacity
             style={styles.changeButton}
@@ -167,9 +173,10 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 0,
     right: 0,
-    backgroundColor: "#007bff",
+    backgroundColor: "#FF7029",
     borderRadius: 50,
     padding: 5,
+    marginBottom: 10,
   },
   input: {
     width: "100%",
@@ -181,7 +188,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   saveButton: {
-    backgroundColor: "#007bff",
+    backgroundColor: "#FF7029",
     padding: 15,
     borderRadius: 8,
     alignItems: "center",

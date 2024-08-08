@@ -13,6 +13,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { AvatarStack } from "../components/AvatarStack";
 import { useNavigation, useIsFocused } from "@react-navigation/native";
 import { TravelCreationForm } from "../components/TravelCreationForm";
+import { ImageWithSkeleton } from "../components/ImageWithSkeleton";
 import { apiClient } from "../services/api";
 import { Loading } from "../components/Loading";
 import { useAuth } from "../hooks/useAuth";
@@ -24,6 +25,7 @@ interface Trip {
   id: string;
   title: string;
   banner: string;
+  banner_bucket?: string;
   locationName: string;
   longitude: number;
   latitude: number;
@@ -118,6 +120,11 @@ export const HomePage = () => {
     );
   }
 
+  console.log(
+    "http://192.168.0.68:3333/tmp/${user?.avatar_url}",
+    `http://192.168.0.68:3333/tmp/${user?.avatar_url}`
+  );
+
   return (
     <View style={styles.container}>
       <StatusBar style="dark" />
@@ -128,7 +135,7 @@ export const HomePage = () => {
               style={styles.avatar}
               source={{
                 uri:
-                  `http://192.168.0.68:3333/tmp/avatars/${user?.avatar_url}` ||
+                  `http://192.168.0.68:3333/tmp/${user?.avatar_url}` ||
                   user?.bucket_url,
               }}
             />
@@ -163,7 +170,12 @@ export const HomePage = () => {
             onPress={() => handleRedirectDetail(trip)}
           >
             <View style={styles.card}>
-              <Image style={styles.cardImage} source={{ uri: trip.banner }} />
+              <ImageWithSkeleton
+                uri={trip.banner ? trip.banner : trip.banner_bucket}
+                width={238}
+                height={288}
+                borderRadius={10}
+              />
               <Text style={styles.cardTitle}>{trip.title}</Text>
               <View style={styles.locationContainer}>
                 <View style={styles.locationGroup}>

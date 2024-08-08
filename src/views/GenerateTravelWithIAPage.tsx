@@ -524,12 +524,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#666",
   },
-  // optionItem: {
-  //   paddingVertical: 10,
-  //   paddingHorizontal: 15,
-  //   borderBottomWidth: 1,
-  //   borderBottomColor: "#ddd",
-  // },
   clearButton: {
     alignItems: "center",
     marginTop: 10,
@@ -555,18 +549,6 @@ const styles = StyleSheet.create({
   clearIcon: {
     marginLeft: 5,
   },
-  // input: {
-  //   height: 40,
-  //   borderColor: "#ddd",
-  //   borderWidth: 1,
-  //   marginBottom: 20,
-  //   paddingHorizontal: 10,
-  //   borderRadius: 4,
-  //   backgroundColor: "#fff",
-  // },
-  // optionsContainer: {
-  //   marginTop: 5,
-  // },
   optionsContainer: {
     marginTop: 10,
   },

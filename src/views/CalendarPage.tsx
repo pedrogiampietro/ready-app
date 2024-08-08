@@ -15,6 +15,7 @@ import { useNavigation, useIsFocused } from "@react-navigation/native";
 import { apiClient } from "../services/api";
 import { formatDate } from "../utils";
 import { useAuth } from "../hooks/useAuth";
+import { ImageWithSkeleton } from "../components/ImageWithSkeleton";
 
 export const CalendarPage = () => {
   const navigation = useNavigation() as any;
@@ -153,11 +154,11 @@ export const CalendarPage = () => {
                   index === trips.length - 1 && styles.lastCard,
                 ]}
               >
-                <Image
-                  style={styles.cardImage}
-                  source={{
-                    uri: item.banner || "https://via.placeholder.com/100",
-                  }}
+                <ImageWithSkeleton
+                  uri={item.banner ? item.banner : item.banner_bucket}
+                  width={100}
+                  height={100}
+                  borderRadius={10}
                 />
                 <View style={styles.cardContent}>
                   <View style={styles.cardRow}>
