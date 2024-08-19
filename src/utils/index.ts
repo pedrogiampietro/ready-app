@@ -6,3 +6,9 @@ export const formatDate = (dateString: string) => {
   };
   return new Date(dateString).toLocaleDateString("pt-BR", options);
 };
+
+export const getInitials = (name: string) => {
+  const names = name.split(" ");
+  const initials = names.map((n) => n[0]).join("");
+  return initials.toUpperCase();
+};

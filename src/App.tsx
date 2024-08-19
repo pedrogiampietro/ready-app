@@ -5,6 +5,7 @@ import { useLoadFonts } from "./fonts/useLoadFonts";
 import { Navigator } from "./components/Navigator";
 import * as SplashScreen from "expo-splash-screen";
 import { AuthProvider } from "./context/AuthContext";
+import "expo-dev-client";
 
 SplashScreen.preventAutoHideAsync().catch(console.error);
 

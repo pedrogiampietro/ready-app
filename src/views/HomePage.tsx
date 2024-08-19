@@ -17,9 +17,23 @@ import { ImageWithSkeleton } from "../components/ImageWithSkeleton";
 import { apiClient } from "../services/api";
 import { Loading } from "../components/Loading";
 import { useAuth } from "../hooks/useAuth";
+import { getInitials } from "../utils";
+import admob, {
+  InterstitialAd,
+  AdEventType,
+  TestIds,
+} from "react-native-google-mobile-ads";
 
 const { width, height } = Dimensions.get("window");
 const defaultImage = require("../../assets/no-img.jpg");
+
+const adUnitId = __DEV__
+  ? TestIds.INTERSTITIAL
+  : "ca-app-pub-xxxxxxxxxxxxxxxx/xxxxxxxxxx";
+
+const interstitial = InterstitialAd.createForAdRequest(adUnitId, {
+  requestNonPersonalizedAdsOnly: true,
+});
 
 interface Trip {
   id: string;
@@ -63,10 +77,15 @@ export const HomePage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [refresh, setRefresh] = useState(false);
+  const [lastAdTime, setLastAdTime] = useState<number | null>(null);
 
   const navigation = useNavigation() as any;
   const isFocused = useIsFocused();
   const { user } = useAuth();
+
+  const adInterval = 2 * 60 * 1000;
+
+  console.log("user", user);
 
   useEffect(() => {
     const fetchTrips = async () => {
@@ -94,6 +113,40 @@ export const HomePage = () => {
     fetchTrips();
   }, [refresh, isFocused]);
 
+  useEffect(() => {
+    // Verifica se o usuário não é 'pro'
+    if (user?.planId !== "pro-plan-id") {
+      const showAd = () => {
+        const currentTime = new Date().getTime();
+
+        if (!lastAdTime || currentTime - lastAdTime >= adInterval) {
+          const unsubscribe = interstitial.addAdEventListener(
+            AdEventType.LOADED,
+            () => {
+              interstitial.show();
+            }
+          );
+
+          interstitial.addAdEventListener(AdEventType.CLOSED, () => {
+            setLastAdTime(currentTime);
+          });
+
+          interstitial.load();
+
+          return () => {
+            unsubscribe();
+          };
+        }
+      };
+
+      const adTimeout = setTimeout(showAd, adInterval);
+
+      return () => {
+        clearTimeout(adTimeout);
+      };
+    }
+  }, [user, lastAdTime]);
+
   const handleRedirectDetail = (trip: Trip) => {
     navigation.navigate("TravelDetailPage", { trip });
   };
@@ -120,25 +173,28 @@ export const HomePage = () => {
     );
   }
 
-  console.log(
-    "http://192.168.0.68:3333/tmp/${user?.avatar_url}",
-    `http://192.168.0.68:3333/tmp/${user?.avatar_url}`
-  );
-
   return (
     <View style={styles.container}>
       <StatusBar style="dark" />
       <View style={styles.header}>
         <TouchableOpacity onPress={handleProfileRedirect}>
           <View style={styles.avatarContainer}>
-            <Image
-              style={styles.avatar}
-              source={{
-                uri:
-                  `http://192.168.0.68:3333/tmp/${user?.avatar_url}` ||
-                  user?.bucket_url,
-              }}
-            />
+            {user?.avatar_url || user?.bucket_url ? (
+              <Image
+                style={styles.avatar}
+                source={{
+                  uri: user?.avatar_url
+                    ? `http://192.168.1.7:3333/tmp/${user?.avatar_url}`
+                    : user?.bucket_url,
+                }}
+              />
+            ) : (
+              <View style={styles.avatarFallback}>
+                <Text style={styles.avatarText}>
+                  {getInitials(user?.name || "User")}
+                </Text>
+              </View>
+            )}
             <Text style={styles.userName}>{user?.name}</Text>
           </View>
         </TouchableOpacity>
@@ -239,6 +295,20 @@ const styles = StyleSheet.create({
     height: 44,
     borderRadius: 22,
     marginRight: 10,
+  },
+  avatarFallback: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "#FF7029",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 10,
+  },
+  avatarText: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
   },
   userName: {
     fontSize: 18,

@@ -8,6 +8,8 @@ interface User {
   trips: Trip[];
   avatar_url: string;
   bucket_url?: string;
+  planId: string;
+  totalTrips: number;
 }
 
 interface Trip {

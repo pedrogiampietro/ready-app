@@ -7,6 +7,7 @@ import {
   StyleSheet,
   ToastAndroid,
   ActivityIndicator,
+  Image,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
@@ -26,7 +27,7 @@ export const LoginPage = () => {
   };
 
   const handleBack = () => {
-    navigation.navigate("OnboardPeoplePage");
+    navigation.navigate("OnboardWidePage");
   };
 
   const handleRegister = () => {
@@ -74,62 +75,70 @@ export const LoginPage = () => {
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
       </View>
-      <View style={styles.titleContainer}>
-        <Text style={styles.title}>Faça login agora</Text>
-        <Text style={styles.subtitle}>
-          Por favor, faça login para continuar para o app
-        </Text>
-      </View>
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          onChangeText={(text) => setEmail(text)}
-          value={email}
+
+      <View style={styles.centeredContainer}>
+        <Image
+          style={styles.image}
+          source={require("../../assets/logo3.png")}
         />
-        <View style={styles.passwordInput}>
+        <View style={styles.titleContainer}>
+          <Text style={styles.title}>Faça login agora</Text>
+          <Text style={styles.subtitle}>
+            Por favor, faça login para continuar para o app
+          </Text>
+        </View>
+        <View style={styles.inputContainer}>
           <TextInput
-            style={[styles.input, { paddingRight: 40 }]}
-            placeholder="Senha"
-            secureTextEntry={!showPassword}
-            onChangeText={(text) => setPassword(text)}
-            value={password}
+            style={styles.input}
+            placeholder="Email"
+            onChangeText={(text) => setEmail(text)}
+            value={email}
           />
-          <TouchableOpacity
-            onPress={toggleShowPassword}
-            style={styles.showPasswordButton}
-          >
-            <Ionicons
-              name={showPassword ? "eye-off" : "eye"}
-              size={24}
-              color="black"
+          <View style={styles.passwordInput}>
+            <TextInput
+              style={[styles.input, { paddingRight: 40 }]}
+              placeholder="Senha"
+              secureTextEntry={!showPassword}
+              onChangeText={(text) => setPassword(text)}
+              value={password}
             />
+            <TouchableOpacity
+              onPress={toggleShowPassword}
+              style={styles.showPasswordButton}
+            >
+              <Ionicons
+                name={showPassword ? "eye-off" : "eye"}
+                size={24}
+                color="black"
+              />
+            </TouchableOpacity>
+          </View>
+          <TouchableOpacity style={styles.forgotPasswordButton}>
+            <Text style={styles.forgotPasswordText}>Perdeu sua senha?</Text>
           </TouchableOpacity>
         </View>
-        <TouchableOpacity style={styles.forgotPasswordButton}>
-          <Text style={styles.forgotPasswordText}>Perdeu sua senha?</Text>
+        <TouchableOpacity
+          onPress={handleLogin}
+          style={styles.loginButton}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.loginButtonText}>Entrar</Text>
+          )}
         </TouchableOpacity>
-      </View>
-      <TouchableOpacity
-        onPress={handleLogin}
-        style={styles.loginButton}
-        disabled={loading}
-      >
-        {loading ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <Text style={styles.loginButtonText}>Entrar</Text>
-        )}
-      </TouchableOpacity>
-      <View style={styles.signupContainer}>
-        <Text style={styles.signupText}>Você ainda não tem uma conta?</Text>
-        <TouchableOpacity onPress={handleRegister}>
-          <Text style={styles.signupLink}>Crie aqui</Text>
-        </TouchableOpacity>
+        <View style={styles.signupContainer}>
+          <Text style={styles.signupText}>Você ainda não tem uma conta?</Text>
+          <TouchableOpacity onPress={handleRegister}>
+            <Text style={styles.signupLink}>Crie aqui</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -142,6 +151,10 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     alignItems: "center",
     marginBottom: 20,
+  },
+  centeredContainer: {
+    justifyContent: "center",
+    alignItems: "center",
   },
   titleContainer: {
     alignItems: "center",
@@ -156,6 +169,7 @@ const styles = StyleSheet.create({
     color: "gray",
   },
   inputContainer: {
+    width: "100%",
     marginBottom: 20,
   },
   input: {
@@ -186,11 +200,12 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   loginButton: {
+    width: "100%",
+    alignItems: "center",
     backgroundColor: "#FF7029",
     padding: 15,
-    borderRadius: 8,
-    alignItems: "center",
     marginTop: 10,
+    borderRadius: 8,
   },
   loginButtonText: {
     color: "#fff",
@@ -209,4 +224,12 @@ const styles = StyleSheet.create({
   signupLink: {
     color: "#FF7029",
   },
+  image: {
+    width: 100,
+    height: 100,
+    resizeMode: "cover",
+    marginBottom: 20,
+  },
 });
+
+export default LoginPage;

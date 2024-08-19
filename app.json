@@ -21,14 +21,26 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.pedrogiampietro.readytravelapp"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
       "expo-font",
-      "expo-localization"
-    ]
+      "expo-localization",
+      [
+        "react-native-google-mobile-ads",
+        {
+          "androidAppId": "ca-app-pub-4219531028636762~5885248154"
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "df5ea2b5-4d2b-43b7-9773-e43b39cfdb3d"
+      }
+    }
   }
 }

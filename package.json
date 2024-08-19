@@ -4,6 +4,7 @@
   "main": "index.ts",
   "scripts": {
     "start": "expo start",
+    "dev": "npx expo start --dev-client",
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web"
@@ -25,6 +26,7 @@
     "date-fns": "^3.6.0",
     "expo": "^51.0.8",
     "expo-app-loading": "^2.1.1",
+    "expo-dev-client": "~4.0.23",
     "expo-font": "~12.0.5",
     "expo-haptics": "~13.0.1",
     "expo-image": "~1.12.9",
@@ -37,6 +39,7 @@
     "react-native": "0.74.1",
     "react-native-calendars": "^1.1305.0",
     "react-native-gesture-handler": "^2.16.2",
+    "react-native-google-mobile-ads": "^14.2.2",
     "react-native-markdown-display": "^7.0.2",
     "react-native-pager-view": "^6.3.1",
     "react-native-paper": "^5.12.3",

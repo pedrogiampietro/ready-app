@@ -25,6 +25,7 @@ import axios from "axios";
 import { apiClient } from "../services/api";
 import { Loading } from "./Loading";
 import { CheckBox } from "./CheckBox";
+import { useAuth } from "../hooks/useAuth";
 
 const windowHeight = Dimensions.get("window").height;
 
@@ -93,6 +94,8 @@ export const TravelCreationForm = ({ updateCallbackTrips }: any) => {
     useState(false);
   const [loadingDestinationSuggestions, setLoadingDestinationSuggestions] =
     useState(false);
+
+  const { user } = useAuth();
 
   const toggleMealOption = (meal: keyof Meals) => {
     setMeals({
@@ -241,7 +244,7 @@ export const TravelCreationForm = ({ updateCallbackTrips }: any) => {
       formData.append("flightDepartureDate", flightDepartureDate.toString());
       formData.append("flightReturnDate", flightReturnDate.toString());
       formData.append("flightCost", flightCost);
-      formData.append("userId", "b8374eed-dca3-4e38-92d6-a70083531cea");
+      formData.append("userId", user?.id);
 
       // Adicionando o banner
       formData.append("banner", {
