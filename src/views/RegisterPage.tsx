@@ -11,6 +11,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { apiClient } from "../services/api";
+import axios from "axios";
 
 export const RegisterPage = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -27,11 +28,14 @@ export const RegisterPage = () => {
   const handleRegister = async () => {
     setLoading(true);
     try {
-      const response = await apiClient().post("/users/register", {
-        name,
-        email,
-        password,
-      });
+      const response = await axios.post(
+        "http://192.168.1.7:3333/users/register",
+        {
+          name,
+          email,
+          password,
+        }
+      );
 
       if (response.data.success) {
         ToastAndroid.show("Usuário criado com sucesso!", ToastAndroid.SHORT);

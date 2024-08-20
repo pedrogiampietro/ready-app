@@ -10,6 +10,7 @@ interface User {
   bucket_url?: string;
   planId: string;
   totalTrips: number;
+  token: string;
 }
 
 interface Trip {
@@ -25,8 +26,9 @@ interface AuthContextType {
   user: User | null;
   setUser: any;
   isLoggedIn: boolean;
-  login: (userData: User) => void;
+  login: (userData: User, token: string) => void;
   logout: () => void;
+  loading: boolean;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(
@@ -35,10 +37,15 @@ export const AuthContext = createContext<AuthContextType | undefined>(
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const login = async (userData: User) => {
-    setUser(userData);
-    await AsyncStorage.setItem("user@readyApp", JSON.stringify(userData));
+  const login = async (userData: User, token: string) => {
+    setUser({ ...userData, token });
+
+    await AsyncStorage.setItem(
+      "user@readyApp",
+      JSON.stringify({ ...userData, token })
+    );
   };
 
   const logout = async () => {
@@ -53,6 +60,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         const userData: User = JSON.parse(storedUser);
         setUser(userData);
       }
+      setLoading(false);
     };
 
     checkLoggedInUser();
@@ -61,7 +69,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const isLoggedIn = user !== null;
 
   return (
-    <AuthContext.Provider value={{ user, setUser, isLoggedIn, login, logout }}>
+    <AuthContext.Provider
+      value={{ user, setUser, isLoggedIn, login, logout, loading }}
+    >
       {children}
     </AuthContext.Provider>
   );

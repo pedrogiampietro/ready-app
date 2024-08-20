@@ -6050,6 +6050,11 @@ react-native-google-mobile-ads@^14.2.2:
     "@iabtcf/core" "^1.5.3"
     use-deep-compare-effect "^1.8.1"
 
+react-native-iap@^12.15.2:
+  version "12.15.2"
+  resolved "https://registry.yarnpkg.com/react-native-iap/-/react-native-iap-12.15.2.tgz#328b84d39cb15a9c0d6cec2482cdcca39a838fa6"
+  integrity sha512-P5gIepfzXLOfpbdntMgGHu53tpMDoJlnYh0rX4qRygyYp+L7U7aFYON0cqf+lK4RKBpZmYHA4NRlBojMwz9pCQ==
+
 react-native-markdown-display@^7.0.2:
   version "7.0.2"
   resolved "https://registry.npmjs.org/react-native-markdown-display/-/react-native-markdown-display-7.0.2.tgz"

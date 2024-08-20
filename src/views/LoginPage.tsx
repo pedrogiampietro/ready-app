@@ -13,6 +13,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { useAuth } from "../hooks/useAuth";
 import { apiClient } from "../services/api";
+import axios from "axios";
 
 export const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -37,14 +38,18 @@ export const LoginPage = () => {
   const handleLogin = async () => {
     setLoading(true);
     try {
-      const response = await apiClient().post("/users/login", {
+      const response = await axios.post("http://192.168.1.7:3333/users/login", {
         email,
         password,
       });
 
       if (response.status === 200 && response.data.success) {
+        axios.defaults.headers[
+          "Authorization"
+        ] = `Bearer ${response.data?.token}`;
+
         ToastAndroid.show("Login bem sucedido", ToastAndroid.SHORT);
-        login(response.data.data);
+        login(response.data.data, response.data.token);
         navigation.navigate("HomeTabs");
       } else {
         ToastAndroid.show(

@@ -14,7 +14,7 @@ import { AvatarStack } from "../components/AvatarStack";
 import { useNavigation, useIsFocused } from "@react-navigation/native";
 import { TravelCreationForm } from "../components/TravelCreationForm";
 import { ImageWithSkeleton } from "../components/ImageWithSkeleton";
-import { apiClient } from "../services/api";
+import { apiClient, signOut } from "../services/api";
 import { Loading } from "../components/Loading";
 import { useAuth } from "../hooks/useAuth";
 import { getInitials } from "../utils";
@@ -85,12 +85,11 @@ export const HomePage = () => {
 
   const adInterval = 2 * 60 * 1000;
 
-  console.log("user", user);
-
   useEffect(() => {
     const fetchTrips = async () => {
       try {
-        const response = await apiClient().get("/trips");
+        const api = await apiClient();
+        const response = await api.get("/trips");
 
         const updatedData = response.data.map((trip: Trip) => ({
           ...trip,
@@ -98,13 +97,14 @@ export const HomePage = () => {
             ? trip.banner
             : Image.resolveAssetSource(defaultImage).uri,
           images: trip.images.map(
-            (image) => `http://192.168.0.68:3333/${image}`
+            (image) => `http://192.168.1.7:3333/${image}`
           ),
         }));
 
         setTrips(updatedData);
       } catch (error: any) {
         setError(error);
+        signOut();
       } finally {
         setLoading(false);
       }

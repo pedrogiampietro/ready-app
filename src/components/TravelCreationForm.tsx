@@ -15,7 +15,6 @@ import {
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
-  Button,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
@@ -269,7 +268,8 @@ export const TravelCreationForm = ({ updateCallbackTrips }: any) => {
         }
       });
 
-      const response = await apiClient().post("/trips/create", formData, {
+      const api = await apiClient();
+      const response = await api.post("/trips/create", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -293,11 +293,13 @@ export const TravelCreationForm = ({ updateCallbackTrips }: any) => {
     setLoadingEbelizeTitle(true);
 
     try {
-      const { data } = await apiClient().post("/chat/embellish-title", {
+      const api = await apiClient();
+      const { data } = await api.post("/chat/embellish-title", {
         title,
       });
       setTitle(data.response);
     } catch (error) {
+      console.error("error", error);
     } finally {
       setLoadingEbelizeTitle(false);
     }

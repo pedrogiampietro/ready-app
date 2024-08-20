@@ -20,7 +20,7 @@ import { getInitials } from "../utils";
 export const ProfilePage = () => {
   const { user, logout, setUser } = useAuth();
   const navigation = useNavigation() as any;
-  const [name, setName] = useState(user?.name || "");
+  const [name, _] = useState(user?.name || "");
   const [avatar, setAvatar] = useState(user?.avatar_url || "");
   const [avatarUri, setAvatarUri] = useState("");
   const [loading, setLoading] = useState(false);
@@ -31,6 +31,10 @@ export const ProfilePage = () => {
     setTimeout(() => {
       navigation.navigate("LoginPage");
     }, 0);
+  };
+
+  const handlePaymentRedirect = () => {
+    navigation.navigate("PlansPage");
   };
 
   const changeHeaderImage = async () => {
@@ -100,6 +104,8 @@ export const ProfilePage = () => {
     }
   };
 
+  console.log("user", user);
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -116,7 +122,9 @@ export const ProfilePage = () => {
             <Image
               style={styles.avatar}
               source={{
-                uri: avatar,
+                uri: user?.avatar_url
+                  ? `http://192.168.1.7:3333/tmp/${user?.avatar_url}`
+                  : user?.bucket_url || avatar,
               }}
             />
           ) : (
@@ -142,42 +150,45 @@ export const ProfilePage = () => {
             <Text style={styles.statLabel}>Total Trips</Text>
           </View>
           <View style={styles.stat}>
-            <Text style={styles.statValue}>2.102</Text>
+            <Text style={styles.statValue}>0</Text>
             <Text style={styles.statLabel}>Followers</Text>
           </View>
           <View style={styles.stat}>
-            <Text style={styles.statValue}>2.712</Text>
+            <Text style={styles.statValue}>0</Text>
             <Text style={styles.statLabel}>Following</Text>
           </View>
         </View>
       </View>
 
       <View style={styles.settingsContainer}>
-        <TouchableOpacity style={styles.setting}>
-          <Ionicons name="wallet-outline" size={24} color="#3b2416" />
+        <TouchableOpacity
+          style={styles.setting}
+          onPress={handlePaymentRedirect}
+        >
+          <Ionicons name="wallet-outline" size={24} color="#fff" />
           <Text style={styles.settingText}>Payment</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.setting}>
-          <Ionicons name="heart-outline" size={24} color="#3b2416" />
+          <Ionicons name="heart-outline" size={24} color="#fff" />
           <Text style={styles.settingText}>Favorites</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.setting}>
-          <Ionicons name="settings-outline" size={24} color="#3b2416" />
+          <Ionicons name="settings-outline" size={24} color="#fff" />
           <Text style={styles.settingText}>Settings</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.setting}>
-          <Ionicons name="language-outline" size={24} color="#3b2416" />
+          <Ionicons name="language-outline" size={24} color="#fff" />
           <Text style={styles.settingText}>Language</Text>
           <Text style={styles.languageText}>English</Text>
         </TouchableOpacity>
-        <View style={styles.setting}>
-          <Ionicons name="moon-outline" size={24} color="#3b2416" />
+        {/* <View style={styles.setting}>
+          <Ionicons name="moon-outline" size={24} color="#fff" />
           <Text style={styles.settingText}>Dark Mode</Text>
           <Switch
             value={darkMode}
             onValueChange={() => setDarkMode(!darkMode)}
           />
-        </View>
+        </View> */}
       </View>
 
       <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
@@ -199,7 +210,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: "#2b1a12", // Ajuste de cor para um fundo mais escuro
+    backgroundColor: "#2b1a12",
   },
   header: {
     flexDirection: "row",
