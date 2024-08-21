@@ -37,10 +37,13 @@ export const LoginPage = () => {
   const handleLogin = async () => {
     setLoading(true);
     try {
-      const response = await axios.post("http://192.168.1.7:3333/users/login", {
-        email,
-        password,
-      });
+      const response = await axios.post(
+        "https://ready-api.vercel.app/users/login",
+        {
+          email,
+          password,
+        }
+      );
 
       if (response.status === 200 && response.data.success) {
         axios.defaults.headers[

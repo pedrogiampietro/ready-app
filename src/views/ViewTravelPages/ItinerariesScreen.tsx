@@ -29,13 +29,12 @@ const ItinerariesScreen = ({ trip, updateTripData }: any) => {
       return;
     }
 
-    // Converter a data para ISO-8601
     const [day, month, year] = newItinerary.date.split("/");
     const isoDate = new Date(`${year}-${month}-${day}`).toISOString();
 
     const itineraryData = {
       ...newItinerary,
-      date: isoDate, // Usar a data no formato ISO-8601
+      date: isoDate,
     };
 
     try {

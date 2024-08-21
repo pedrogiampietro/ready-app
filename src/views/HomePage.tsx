@@ -97,7 +97,7 @@ export const HomePage = () => {
             ? trip.banner
             : Image.resolveAssetSource(defaultImage).uri,
           images: trip.images.map(
-            (image) => `http://192.168.1.7:3333/${image}`
+            (image) => `https://ready-api.vercel.app/${image}`
           ),
         }));
 
@@ -184,7 +184,7 @@ export const HomePage = () => {
                 style={styles.avatar}
                 source={{
                   uri: user?.avatar_url
-                    ? `http://192.168.1.7:3333/tmp/${user?.avatar_url}`
+                    ? `https://ready-api.vercel.app/tmp/${user?.avatar_url}`
                     : user?.bucket_url,
                 }}
               />
