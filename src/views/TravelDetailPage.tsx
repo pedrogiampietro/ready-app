@@ -66,7 +66,8 @@ export const TravelDetailPage = () => {
         userId: user?.id,
       };
 
-      await apiClient().post("http://seu-endereco-api/reviews", reviewData);
+      const api = await apiClient();
+      await api.post("http://seu-endereco-api/reviews", reviewData);
       setIsLiked(true);
       setModalVisible(false);
     } catch (error) {

@@ -265,6 +265,18 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(0, 0, 0, 0.8)",
   },
+  addRestaurantForm: {
+    marginTop: 20,
+    padding: 16,
+    backgroundColor: "#f2f2f2",
+    borderRadius: 8,
+  },
+  addItineraryForm: {
+    marginTop: 20,
+    padding: 16,
+    backgroundColor: "#f2f2f2",
+    borderRadius: 8,
+  },
 });
 
 export default styles;

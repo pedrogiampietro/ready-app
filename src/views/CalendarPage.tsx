@@ -26,9 +26,8 @@ export const CalendarPage = () => {
 
   const fetchTrips = async () => {
     try {
-      const response = await apiClient().get(
-        `/trips/trips-by-user/${user?.id}`
-      );
+      const api = await apiClient();
+      const response = await api.get(`/trips/trips-by-user/${user?.id}`);
       setTrips(response.data);
     } catch (error) {
       console.error("Error fetching trips: ", error);

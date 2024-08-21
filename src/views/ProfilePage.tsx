@@ -77,7 +77,8 @@ export const ProfilePage = () => {
     }
 
     try {
-      const response = await apiClient().put("/users/profile", formData, {
+      const api = await apiClient();
+      const response = await api.put("/users/profile", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -96,15 +97,12 @@ export const ProfilePage = () => {
         ToastAndroid.show(errorMessage, ToastAndroid.SHORT);
       }
     } catch (error: any) {
-      console.log(error);
       const errorText = error.message || "Erro ao atualizar perfil.";
       ToastAndroid.show(errorText, ToastAndroid.SHORT);
     } finally {
       setLoading(false);
     }
   };
-
-  console.log("user", user);
 
   return (
     <View style={styles.container}>

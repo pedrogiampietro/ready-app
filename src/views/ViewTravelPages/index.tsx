@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, Alert } from "react-native";
+import React, { useState } from "react";
+import { View, Text, TouchableOpacity } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation, useRoute } from "@react-navigation/native";
@@ -7,7 +7,6 @@ import GeneralScreen from "./GeneralScreen";
 import RestaurantsScreen from "./RestaurantsScreen";
 import ItinerariesScreen from "./ItinerariesScreen";
 import styles from "./styles";
-import { apiClient } from "../../services/api";
 
 export const ViewTravelPage = () => {
   const navigation = useNavigation() as any;
@@ -30,9 +29,13 @@ export const ViewTravelPage = () => {
       case "Geral":
         return <GeneralScreen trip={updatedTrip} updateTripData={updateTrip} />;
       case "Restaurantes":
-        return <RestaurantsScreen trip={updatedTrip} />;
+        return (
+          <RestaurantsScreen trip={updatedTrip} updateTripData={updateTrip} />
+        );
       case "Itinerários":
-        return <ItinerariesScreen trip={updatedTrip} />;
+        return (
+          <ItinerariesScreen trip={updatedTrip} updateTripData={updateTrip} />
+        );
       default:
         return null;
     }

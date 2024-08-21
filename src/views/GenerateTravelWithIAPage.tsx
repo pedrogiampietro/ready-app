@@ -88,7 +88,8 @@ export const GenerateTravelWithIAPage = () => {
     };
 
     try {
-      const result = await apiClient().post("/chat", travelPreferences);
+      const api = await apiClient();
+      const result = await api.post("/chat", travelPreferences);
       setTravelPlan(result.data.response);
       setShowModal(true);
     } catch (error) {
@@ -157,7 +158,8 @@ export const GenerateTravelWithIAPage = () => {
     };
 
     try {
-      await apiClient().post("/trips/save-with-ia", payload);
+      const api = await apiClient();
+      await api.post("/trips/save-with-ia", payload);
       alert("Viagem salva com sucesso!");
       setShowModal(false);
       navigation.navigate("HomePage", { refresh: true });

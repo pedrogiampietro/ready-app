@@ -10,7 +10,6 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import { apiClient } from "../services/api";
 import axios from "axios";
 
 export const RegisterPage = () => {

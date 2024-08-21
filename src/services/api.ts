@@ -29,8 +29,6 @@ export async function signOut() {
 export async function apiClient() {
   const storedUser = await AsyncStorage.getItem("user@readyApp");
 
-  console.log("storedUser", storedUser);
-
   if (storedUser) {
     const userData = JSON.parse(storedUser);
     user = userData;

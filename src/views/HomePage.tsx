@@ -369,7 +369,8 @@ const styles = StyleSheet.create({
   },
   card: {
     width: 238,
-    height: 360,
+    height: "100%",
+    maxHeight: 400,
     borderRadius: 10,
     overflow: "hidden",
     marginRight: 20,

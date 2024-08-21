@@ -12,7 +12,6 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { useAuth } from "../hooks/useAuth";
-import { apiClient } from "../services/api";
 import axios from "axios";
 
 export const LoginPage = () => {
@@ -56,11 +55,6 @@ export const LoginPage = () => {
           response.data.message || "Ahhh! falha",
           ToastAndroid.SHORT
         );
-        console.log({
-          success: false,
-          message: response.data.message,
-          data: null,
-        });
       }
     } catch (error) {
       console.error("Login error:", error);

@@ -98,7 +98,8 @@ const GeneralScreen = ({ trip, updateTripData }: any) => {
       });
 
     try {
-      const response = await apiClient().put(`/trips/${trip.id}`, formData, {
+      const api = await apiClient();
+      const response = await api.put(`/trips/${trip.id}`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -220,7 +221,8 @@ const GeneralScreen = ({ trip, updateTripData }: any) => {
           onPress: async () => {
             try {
               setLoading(true);
-              await apiClient().delete(`/trips/${trip.id}`);
+              const api = await apiClient();
+              await api.delete(`/trips/${trip.id}`);
               navigation.navigate("HomePage");
               Alert.alert("Sucesso", "Viagem excluída com sucesso!");
             } catch (error) {
