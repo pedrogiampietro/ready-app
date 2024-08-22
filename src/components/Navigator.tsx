@@ -15,6 +15,9 @@ import { GenerateTravelWithIAPage } from "../views/GenerateTravelWithIAPage";
 import { useAuth } from "../hooks/useAuth";
 import { ProfilePage } from "../views/ProfilePage";
 import { PlansPage } from "../views/PlansPage";
+import { ForgotPasswordScreen } from "../views/ForgotPasswordPages/ForgotPasswordScreen";
+import { EnterCodeScreen } from "../views/ForgotPasswordPages/EnterCodeScreen";
+import { NewPasswordScreen } from "../views/ForgotPasswordPages/NewPasswordScreen";
 
 export type RootStackParamList = {
   HomeTabs: undefined;
@@ -29,6 +32,9 @@ export type RootStackParamList = {
   ViewTravelPage: undefined;
   ProfilePage: undefined;
   PlansPage: undefined;
+  ForgotPasswordScreen: undefined;
+  EnterCodeScreen: undefined;
+  NewPasswordScreen: undefined;
 };
 
 const RootStack = createNativeStackNavigator<RootStackParamList>();
@@ -144,6 +150,18 @@ export const Navigator = () => {
             />
             <RootStack.Screen name="LoginPage" component={LoginPage} />
             <RootStack.Screen name="RegisterPage" component={RegisterPage} />
+            <RootStack.Screen
+              name="ForgotPasswordScreen"
+              component={ForgotPasswordScreen}
+            />
+            <RootStack.Screen
+              name="EnterCodeScreen"
+              component={EnterCodeScreen}
+            />
+            <RootStack.Screen
+              name="NewPasswordScreen"
+              component={NewPasswordScreen}
+            />
           </>
         )}
       </RootStack.Navigator>

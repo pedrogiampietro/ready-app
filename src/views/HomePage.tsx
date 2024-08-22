@@ -18,7 +18,7 @@ import { apiClient, signOut } from "../services/api";
 import { Loading } from "../components/Loading";
 import { useAuth } from "../hooks/useAuth";
 import { getInitials } from "../utils";
-import admob, {
+import {
   InterstitialAd,
   AdEventType,
   TestIds,
@@ -29,7 +29,7 @@ const defaultImage = require("../../assets/no-img.jpg");
 
 const adUnitId = __DEV__
   ? TestIds.INTERSTITIAL
-  : "ca-app-pub-xxxxxxxxxxxxxxxx/xxxxxxxxxx";
+  : "ca-app-pub-4219531028636762~5885248154";
 
 const interstitial = InterstitialAd.createForAdRequest(adUnitId, {
   requestNonPersonalizedAdsOnly: true,

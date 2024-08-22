@@ -21,7 +21,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.pedrogiampietro.readytravelapp"
+      "package": "com.readytravelapp"
     },
     "web": {
       "favicon": "./assets/favicon.png"

@@ -34,6 +34,10 @@ export const LoginPage = () => {
     navigation.navigate("RegisterPage");
   };
 
+  const handleForgotPassword = () => {
+    navigation.navigate("ForgotPasswordScreen");
+  };
+
   const handleLogin = async () => {
     setLoading(true);
     try {
@@ -74,7 +78,7 @@ export const LoginPage = () => {
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={handleBack}>
-          <Ionicons name="arrow-back" size={24} color="black" />
+          <Ionicons name="arrow-back" size={28} color="black" />
         </TouchableOpacity>
       </View>
 
@@ -115,7 +119,10 @@ export const LoginPage = () => {
               />
             </TouchableOpacity>
           </View>
-          <TouchableOpacity style={styles.forgotPasswordButton}>
+          <TouchableOpacity
+            style={styles.forgotPasswordButton}
+            onPress={handleForgotPassword}
+          >
             <Text style={styles.forgotPasswordText}>Perdeu sua senha?</Text>
           </TouchableOpacity>
         </View>
@@ -222,9 +229,11 @@ const styles = StyleSheet.create({
   },
   signupText: {
     marginRight: 5,
+    fontSize: 16,
   },
   signupLink: {
     color: "#FF7029",
+    fontSize: 16,
   },
   image: {
     width: 100,
