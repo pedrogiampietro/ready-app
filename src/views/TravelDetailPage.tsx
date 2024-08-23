@@ -67,7 +67,7 @@ export const TravelDetailPage = () => {
       };
 
       const api = await apiClient();
-      await api.post("http://seu-endereco-api/reviews", reviewData);
+      await api.post("/reviews", reviewData);
       setIsLiked(true);
       setModalVisible(false);
     } catch (error) {
@@ -85,7 +85,7 @@ export const TravelDetailPage = () => {
 
   return (
     <View style={styles.container}>
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
       <LinearGradient colors={["#FF7029", "#fba275"]} style={styles.header}>
         <TouchableOpacity onPress={handleBack}>
           <Ionicons name="arrow-back" size={24} color="#fff" />

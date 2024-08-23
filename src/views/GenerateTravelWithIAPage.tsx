@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Switch,
   ScrollView,
+  Alert,
 } from "react-native";
 import { Ionicons, MaterialIcons as Icon } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
@@ -19,6 +20,7 @@ import axios from "axios";
 import { Loading } from "../components/Loading";
 import { TravelPlanModal } from "../components/TravelPlanModal";
 import { useAuth } from "../hooks/useAuth";
+import { UpgradePlanModal } from "../components/UpgradePlanModal";
 
 interface LocationOption {
   name: string;
@@ -58,6 +60,7 @@ export const GenerateTravelWithIAPage = () => {
     useState(false);
   const [loadingDestinationSuggestions, setLoadingDestinationSuggestions] =
     useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   const { user } = useAuth();
 
@@ -94,8 +97,16 @@ export const GenerateTravelWithIAPage = () => {
 
       setTravelPlan(result.data.response);
       setShowModal(true);
-    } catch (error) {
-      console.error("Erro ao gerar viagem:", error);
+    } catch (error: any) {
+      if (error.response && error.response.status === 403) {
+        setShowUpgradeModal(true);
+      } else {
+        console.error("Erro ao gerar viagem:", error);
+        Alert.alert(
+          "Erro",
+          "Ocorreu um erro ao gerar a viagem. Tente novamente."
+        );
+      }
     } finally {
       setLoading(false);
     }
@@ -442,6 +453,14 @@ export const GenerateTravelWithIAPage = () => {
         travelPlan={travelPlan}
         onClose={() => setShowModal(false)}
         onSave={handleSaveTrip}
+      />
+      <UpgradePlanModal
+        visible={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        onUpgrade={() => {
+          setShowUpgradeModal(false);
+          navigation.navigate("PlansPage");
+        }}
       />
     </ScrollView>
   );
