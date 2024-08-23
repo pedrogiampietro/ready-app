@@ -42,7 +42,8 @@ export const LoginPage = () => {
     setLoading(true);
     try {
       const response = await axios.post(
-        "https://ready-api.vercel.app/users/login",
+        // "https://ready-api.vercel.app/users/login",
+        "http://192.168.1.7:3333/users/login",
         {
           email,
           password,

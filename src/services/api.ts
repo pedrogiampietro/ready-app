@@ -10,7 +10,8 @@ export let baseURL = process.env.REACT_APP_API_URL
   ? process.env.REACT_APP_API_URL.startsWith("https")
     ? `${process.env.REACT_APP_API_URL}`
     : process.env.REACT_APP_API_URL
-  : "https://ready-api.vercel.app";
+  : "http://192.168.1.7:3333";
+// : "https://ready-api.vercel.app";
 
 export async function signOut() {
   await AsyncStorage.removeItem("user@readyApp");

@@ -97,7 +97,8 @@ export const HomePage = () => {
             ? trip.banner
             : Image.resolveAssetSource(defaultImage).uri,
           images: trip.images.map(
-            (image) => `https://ready-api.vercel.app/${image}`
+            (image) => `http://192.168.1.7:3333/${image}`
+            // (image) => `https://ready-api.vercel.app/${image}`
           ),
         }));
 
