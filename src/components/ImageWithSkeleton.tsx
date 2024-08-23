@@ -15,6 +15,11 @@ export const ImageWithSkeleton: React.FC<ImageWithSkeletonProps> = ({
   borderRadius = 0,
 }) => {
   const [loading, setLoading] = useState(true);
+  const defaultImage = require("../../assets/no-img.jpg");
+
+  const handleImageError = () => {
+    setLoading(false);
+  };
 
   return (
     <View style={[styles.container, { width, height, borderRadius }]}>
@@ -24,9 +29,10 @@ export const ImageWithSkeleton: React.FC<ImageWithSkeletonProps> = ({
         </View>
       )}
       <Image
-        source={{ uri }}
+        source={uri ? { uri } : defaultImage}
         style={[styles.image, { width, height, borderRadius }]}
         onLoad={() => setLoading(false)}
+        onError={handleImageError}
       />
     </View>
   );
