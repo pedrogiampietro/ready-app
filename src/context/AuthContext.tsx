@@ -11,6 +11,7 @@ interface User {
   planId: string;
   totalTrips: number;
   token: string;
+  created_at: string;
 }
 
 interface Trip {

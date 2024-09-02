@@ -114,7 +114,7 @@ export const Navigator = () => {
   return (
     <NavigationContainer>
       <RootStack.Navigator
-        initialRouteName={isLoggedIn ? "HomeTabs" : "LoginPage"}
+        initialRouteName={isLoggedIn ? "HomeTabs" : "OnboardWidePage"}
         screenOptions={{
           headerShown: false,
         }}

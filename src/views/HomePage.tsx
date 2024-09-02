@@ -29,7 +29,7 @@ const defaultImage = require("../../assets/no-img.jpg");
 
 const adUnitId = __DEV__
   ? TestIds.INTERSTITIAL
-  : "ca-app-pub-4219531028636762~5885248154";
+  : "ca-app-pub-4219531028636762/1191695805";
 
 const interstitial = InterstitialAd.createForAdRequest(adUnitId, {
   requestNonPersonalizedAdsOnly: true,

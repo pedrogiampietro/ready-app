@@ -15,7 +15,7 @@ import { useNavigation } from "@react-navigation/native";
 import { useAuth } from "../hooks/useAuth";
 import { apiClient } from "../services/api";
 import * as ImagePicker from "expo-image-picker";
-import { getInitials } from "../utils";
+import { formatDate, getInitials } from "../utils";
 
 export const ProfilePage = () => {
   const { user, logout, setUser } = useAuth();
@@ -142,7 +142,9 @@ export const ProfilePage = () => {
           </TouchableOpacity>
         </View>
         <Text style={styles.name}>{name}</Text>
-        <Text style={styles.joinDate}>Joined October 2020</Text>
+        <Text style={styles.joinDate}>
+          Ingressou em {formatDate(user?.created_at)}
+        </Text>
         <View style={styles.statsContainer}>
           <View style={styles.stat}>
             <Text style={styles.statValue}>{user?.totalTrips}</Text>
@@ -150,11 +152,11 @@ export const ProfilePage = () => {
           </View>
           <View style={styles.stat}>
             <Text style={styles.statValue}>0</Text>
-            <Text style={styles.statLabel}>Followers</Text>
+            <Text style={styles.statLabel}>Seguidores</Text>
           </View>
           <View style={styles.stat}>
             <Text style={styles.statValue}>0</Text>
-            <Text style={styles.statLabel}>Following</Text>
+            <Text style={styles.statLabel}>Seguindo</Text>
           </View>
         </View>
       </View>
@@ -165,11 +167,11 @@ export const ProfilePage = () => {
           onPress={handlePaymentRedirect}
         >
           <Ionicons name="wallet-outline" size={24} color="#fff" />
-          <Text style={styles.settingText}>Payment</Text>
+          <Text style={styles.settingText}>Pagamentos</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.setting}>
           <Ionicons name="heart-outline" size={24} color="#fff" />
-          <Text style={styles.settingText}>Favorites</Text>
+          <Text style={styles.settingText}>Favoritos</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.setting}>
           <Ionicons name="settings-outline" size={24} color="#fff" />
@@ -177,7 +179,7 @@ export const ProfilePage = () => {
         </TouchableOpacity>
         <TouchableOpacity style={styles.setting}>
           <Ionicons name="language-outline" size={24} color="#fff" />
-          <Text style={styles.settingText}>Language</Text>
+          <Text style={styles.settingText}>Linguagem</Text>
           <Text style={styles.languageText}>English</Text>
         </TouchableOpacity>
         {/* <View style={styles.setting}>
@@ -194,12 +196,12 @@ export const ProfilePage = () => {
         {loading ? (
           <ActivityIndicator color="#fff" />
         ) : (
-          <Text style={styles.saveButtonText}>Save Changes</Text>
+          <Text style={styles.saveButtonText}>Salvar Alterações</Text>
         )}
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-        <Text style={styles.logoutText}>Log out</Text>
+        <Text style={styles.logoutText}>Deslogar</Text>
       </TouchableOpacity>
     </View>
   );
