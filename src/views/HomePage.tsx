@@ -203,7 +203,7 @@ export const HomePage = () => {
       </View>
       <View style={styles.textContainer}>
         <Text style={styles.title}>
-          Explore o mundo {"  "}
+          Explore o mundo
           <Text style={styles.highlight}> bonito</Text> !
         </Text>
         <View style={styles.lineContainer}>

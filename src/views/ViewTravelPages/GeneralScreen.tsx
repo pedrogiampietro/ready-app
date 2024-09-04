@@ -21,6 +21,8 @@ import { HotelCard } from "../../components/HotelCard";
 import { formatDate } from "../../utils";
 import { useNavigation } from "@react-navigation/native";
 
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+
 const GeneralScreen = ({ trip, updateTripData }: any) => {
   const [showFullText, setShowFullText] = useState(false);
   const [dailySavings, setDailySavings] = useState<any>([]);
@@ -116,9 +118,16 @@ const GeneralScreen = ({ trip, updateTripData }: any) => {
         });
         setIsEditing(false);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating trip:", error);
-      Alert.alert("Erro", "Não foi possível atualizar a viagem.");
+      if (error.response && error.response.status === 413) {
+        Alert.alert(
+          "Erro",
+          "O arquivo enviado é muito grande. Por favor, selecione um arquivo menor."
+        );
+      } else {
+        Alert.alert("Erro", "Não foi possível atualizar a viagem.");
+      }
     } finally {
       setLoading(false);
     }
@@ -133,16 +142,22 @@ const GeneralScreen = ({ trip, updateTripData }: any) => {
         "Permita que sua aplicação acesse as imagens"
       );
     } else {
-      const { assets, canceled } = await ImagePicker.launchImageLibraryAsync({
-        allowsEditing: true,
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        base64: false,
-        aspect: [4, 4],
-        quality: 1,
-      });
+      const { assets, canceled }: any =
+        await ImagePicker.launchImageLibraryAsync({
+          allowsEditing: true,
+          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+          base64: false,
+          aspect: [4, 4],
+          quality: 1,
+        });
 
       if (canceled) {
         ToastAndroid.show("Operação cancelada", ToastAndroid.SHORT);
+      } else if (assets[0]?.uri && assets[0].fileSize > MAX_FILE_SIZE) {
+        Alert.alert(
+          "Erro",
+          "A imagem selecionada é muito grande. Por favor, selecione uma imagem menor."
+        );
       } else {
         setImages([...images, assets[0]?.uri]);
       }
@@ -159,16 +174,22 @@ const GeneralScreen = ({ trip, updateTripData }: any) => {
         "Permita que sua aplicação acesse as imagens"
       );
     } else {
-      const { assets, canceled } = await ImagePicker.launchImageLibraryAsync({
-        allowsEditing: true,
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        base64: false,
-        aspect: [4, 4],
-        quality: 1,
-      });
+      const { assets, canceled }: any =
+        await ImagePicker.launchImageLibraryAsync({
+          allowsEditing: true,
+          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+          base64: false,
+          aspect: [4, 4],
+          quality: 1,
+        });
 
       if (canceled) {
         ToastAndroid.show("Operação cancelada", ToastAndroid.SHORT);
+      } else if (assets[0]?.uri && assets[0].fileSize > MAX_FILE_SIZE) {
+        Alert.alert(
+          "Erro",
+          "A imagem selecionada é muito grande. Por favor, selecione uma imagem menor."
+        );
       } else {
         setBanner(assets[0]?.uri);
       }

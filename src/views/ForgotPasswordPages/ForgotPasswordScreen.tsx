@@ -64,12 +64,13 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 20,
     paddingTop: 50,
-    backgroundColor: "#1e1e1e",
+    backgroundColor: "#f1f1f1",
   },
   header: {
     flexDirection: "row",
     justifyContent: "flex-start",
     alignItems: "center",
+    marginTop: 20,
     marginBottom: 20,
   },
   title: {
@@ -84,7 +85,8 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   input: {
-    backgroundColor: "#333",
+    borderColor: "#333",
+    borderWidth: 1,
     padding: 15,
     borderRadius: 8,
     color: "#fff",

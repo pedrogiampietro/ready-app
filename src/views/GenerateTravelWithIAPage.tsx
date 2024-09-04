@@ -496,11 +496,11 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   pickerContainer: {
+    flex: 1,
     borderWidth: 1,
     borderColor: "#ddd",
     borderRadius: 4,
     marginBottom: 20,
-    padding: 10,
     backgroundColor: "#fff",
   },
   picker: {

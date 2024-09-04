@@ -17,6 +17,8 @@ import { apiClient } from "../services/api";
 import * as ImagePicker from "expo-image-picker";
 import { formatDate, getInitials } from "../utils";
 
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+
 export const ProfilePage = () => {
   const { user, logout, setUser } = useAuth();
   const navigation = useNavigation() as any;
@@ -37,44 +39,68 @@ export const ProfilePage = () => {
     navigation.navigate("PlansPage");
   };
 
-  const changeHeaderImage = async () => {
-    const { granted } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!granted) {
-      Alert.alert(
-        "Permissão necessária",
-        "Permita que sua aplicação acesse as imagens"
-      );
-    } else {
-      const { assets, canceled }: any =
-        await ImagePicker.launchImageLibraryAsync({
-          allowsEditing: true,
-          mediaTypes: ImagePicker.MediaTypeOptions.Images,
-          base64: false,
-          aspect: [1, 1],
-          quality: 1,
-        });
-
-      if (canceled) {
-        ToastAndroid.show("Operação cancelada", ToastAndroid.SHORT);
-      } else {
-        setAvatarUri(assets[0]?.uri);
-        setAvatar(assets[0]?.uri);
+  const changeProfileImage = async () => {
+    try {
+      const { granted } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!granted) {
+        Alert.alert(
+          "Permissão necessária",
+          "Permita que sua aplicação acesse as imagens"
+        );
+        return;
       }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        allowsEditing: true,
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        base64: false,
+        aspect: [4, 4],
+        quality: 0.5, // Ajuste a qualidade para reduzir o tamanho do arquivo
+      });
+
+      if (result.canceled) {
+        ToastAndroid.show("Operação cancelada", ToastAndroid.SHORT);
+        return;
+      }
+
+      const selectedAsset = result.assets && result.assets[0];
+      if (selectedAsset) {
+        if (selectedAsset.fileSize > MAX_FILE_SIZE) {
+          Alert.alert(
+            "Erro",
+            "A imagem selecionada é muito grande. Por favor, selecione uma imagem menor."
+          );
+          return;
+        }
+
+        setAvatarUri(selectedAsset.uri);
+        setAvatar(selectedAsset.uri);
+      }
+    } catch (error) {
+      console.error("Erro ao selecionar imagem:", error);
+      Alert.alert(
+        "Erro",
+        "Ocorreu um erro ao acessar a galeria. Tente novamente."
+      );
     }
   };
 
   const handleSave = async () => {
+    if (!avatarUri) {
+      ToastAndroid.show("Nenhuma imagem selecionada.", ToastAndroid.SHORT);
+      return;
+    }
+
     setLoading(true);
-    const formData = new FormData() as any;
+    const formData = new FormData();
     formData.append("name", name);
     formData.append("userId", user?.id);
-    if (avatarUri) {
-      formData.append("avatar", {
-        uri: avatarUri,
-        type: "image/jpeg",
-        name: "avatar.jpg",
-      });
-    }
+    formData.append("avatar", {
+      uri: avatarUri,
+      type: "image/jpeg",
+      name: "avatar.jpg",
+    });
 
     try {
       const api = await apiClient();
@@ -87,7 +113,6 @@ export const ProfilePage = () => {
       if (response.data) {
         setUser({
           ...user,
-          avatar_url: response.data.avatar_url,
           bucket_url: response.data.bucket_url,
         });
         ToastAndroid.show("Perfil atualizado com sucesso!", ToastAndroid.SHORT);
@@ -97,8 +122,16 @@ export const ProfilePage = () => {
         ToastAndroid.show(errorMessage, ToastAndroid.SHORT);
       }
     } catch (error: any) {
-      const errorText = error.message || "Erro ao atualizar perfil.";
-      ToastAndroid.show(errorText, ToastAndroid.SHORT);
+      console.error("Error updating profile:", error);
+
+      if (error.response && error.response.status === 413) {
+        Alert.alert(
+          "Erro",
+          "O arquivo enviado é muito grande. Por favor, selecione um arquivo menor."
+        );
+      } else {
+        Alert.alert("Erro", "Não foi possível atualizar o perfil.");
+      }
     } finally {
       setLoading(false);
     }
@@ -116,14 +149,11 @@ export const ProfilePage = () => {
       </View>
       <View style={styles.profileContainer}>
         <View style={styles.avatarContainer}>
-          {avatar ? (
+          {avatar || user?.bucket_url ? (
             <Image
               style={styles.avatar}
               source={{
-                uri: user?.avatar_url
-                  ? `https://ready-api.vercel.app/tmp/${user?.avatar_url}`
-                  : // `http://192.168.1.7:3333/tmp/${user?.avatar_url}`
-                    user?.bucket_url || avatar,
+                uri: avatarUri ? avatarUri : user?.bucket_url,
               }}
             />
           ) : (
@@ -136,11 +166,12 @@ export const ProfilePage = () => {
 
           <TouchableOpacity
             style={styles.changeButton}
-            onPress={changeHeaderImage}
+            onPress={changeProfileImage}
           >
             <Ionicons name="create-outline" size={24} color="#FFF" />
           </TouchableOpacity>
         </View>
+
         <Text style={styles.name}>{name}</Text>
         <Text style={styles.joinDate}>
           Ingressou em {formatDate(user?.created_at)}
