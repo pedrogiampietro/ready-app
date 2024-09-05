@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
+import PopularLocationCard from "../components/PopularLocationCard";
 import { Ionicons } from "@expo/vector-icons";
 import { AvatarStack } from "../components/AvatarStack";
 import { useNavigation, useIsFocused } from "@react-navigation/native";
@@ -27,9 +28,7 @@ import {
 const { width, height } = Dimensions.get("window");
 const defaultImage = require("../../assets/no-img.jpg");
 
-const adUnitId = __DEV__
-  ? TestIds.INTERSTITIAL
-  : "ca-app-pub-4219531028636762/1191695805";
+const adUnitId = "ca-app-pub-4219531028636762/1191695805";
 
 const interstitial = InterstitialAd.createForAdRequest(adUnitId, {
   requestNonPersonalizedAdsOnly: true,
@@ -72,12 +71,25 @@ interface User {
   name: string;
 }
 
+export interface PopularLocation {
+  id?: string;
+  location: string;
+  from: string;
+  totalCost: number;
+  count: number;
+  banner_bucket?: string;
+  rating?: number;
+}
+
 export const HomePage = () => {
   const [trips, setTrips] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [refresh, setRefresh] = useState(false);
   const [lastAdTime, setLastAdTime] = useState<number | null>(null);
+  const [popularLocations, setPopularLocations] = useState<PopularLocation[]>(
+    []
+  );
 
   const navigation = useNavigation() as any;
   const isFocused = useIsFocused();
@@ -147,6 +159,23 @@ export const HomePage = () => {
     }
   }, [user, lastAdTime]);
 
+  useEffect(() => {
+    const fetchPopularLocations = async () => {
+      try {
+        const api = await apiClient();
+        const response = await api.get("/trips/popular-destinations");
+
+        setPopularLocations(response.data);
+      } catch (error) {
+        console.error("Failed to fetch popular locations", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPopularLocations();
+  }, []);
+
   const handleRedirectDetail = (trip: Trip) => {
     navigation.navigate("TravelDetailPage", { trip });
   };
@@ -174,7 +203,7 @@ export const HomePage = () => {
   }
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <StatusBar style="dark" />
       <View style={styles.header}>
         <TouchableOpacity onPress={handleProfileRedirect}>
@@ -207,16 +236,15 @@ export const HomePage = () => {
           <Image source={require("../../assets/onboard-line.png")} />
         </View>
       </View>
-
       <View style={styles.sliderHeader}>
         <Text style={styles.sliderTitle}>As melhores viagens</Text>
         <Text style={styles.viewAll}>Ver tudo</Text>
       </View>
-
       <ScrollView
         horizontal
-        alwaysBounceVertical
+        alwaysBounceVertical={false}
         showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.tripsContainer}
       >
         {trips.map((trip: Trip) => (
           <TouchableOpacity
@@ -251,9 +279,7 @@ export const HomePage = () => {
                           <Text style={styles.likesText}>
                             +{trip.reviews.length}
                           </Text>
-                        ) : (
-                          <Text></Text>
-                        )}
+                        ) : null}
                       </Fragment>
                     ) : null}
                   </View>
@@ -263,7 +289,27 @@ export const HomePage = () => {
           </TouchableOpacity>
         ))}
       </ScrollView>
-    </View>
+      <View style={styles.popularLocationsContainer}>
+        <Text style={styles.popularLocationsTitle}>Localizações Populares</Text>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.scrollView}
+        >
+          {popularLocations.map((location) => (
+            <PopularLocationCard
+              key={location.id}
+              location={location.location}
+              totalCost={location.totalCost}
+              banner_bucket={location.banner_bucket ?? ""}
+              rating={location.rating ?? 0}
+              count={location.count}
+              from={location.from}
+            />
+          ))}
+        </ScrollView>
+      </View>
+    </ScrollView>
   );
 };
 
@@ -313,25 +359,14 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   textContainer: {
-    textAlign: "center",
     justifyContent: "flex-start",
     alignItems: "flex-start",
     marginTop: 0.05 * height,
-  },
-  subTextContainer: {
-    textAlign: "center",
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: 0.05 * width,
-    marginTop: 0.05 * height,
-    color: "#7D848D",
-    fontSize: 15,
   },
   title: {
     fontSize: 32,
     fontWeight: "bold",
     color: "black",
-    textAlign: "center",
   },
   highlight: {
     fontSize: 32,
@@ -343,13 +378,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginLeft: 0.2 * width,
-  },
-  sliderContainer: {
-    flex: 1,
-    marginTop: 20,
-    textAlign: "center",
-    flexDirection: "row",
-    justifyContent: "space-between",
   },
   sliderHeader: {
     flexDirection: "row",
@@ -365,17 +393,14 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#FF7029",
   },
+  tripsContainer: {
+    marginBottom: 0,
+  },
   card: {
     width: 238,
-    height: "100%",
-    maxHeight: 400,
     borderRadius: 10,
     overflow: "hidden",
     marginRight: 20,
-  },
-  cardImage: {
-    width: "100%",
-    height: "80%",
   },
   cardTitle: {
     fontSize: 14,
@@ -414,6 +439,18 @@ const styles = StyleSheet.create({
   errorText: {
     fontSize: 16,
     color: "red",
+  },
+  popularLocationsContainer: {
+    flex: 1,
+    marginTop: 60,
+  },
+  popularLocationsTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  scrollView: {
+    flexDirection: "row",
   },
 });
 
